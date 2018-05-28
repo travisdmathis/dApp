@@ -10,8 +10,8 @@ const { Content } = Layout;
 class Trades extends Component {
   render() {
     return (
-      <Layout style={{ background: '#FFF' }}>
-        <Content style={{ background: '#FFF' }}>
+      <Layout>
+        <Content>
           <Row type="flex" justify="space-around" gutter={24}>
             <Col span={12}>
               <TradeContainer

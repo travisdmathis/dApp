@@ -54,7 +54,7 @@ class Buy extends Component {
 
     return (
       <Fragment>
-        <div className="tradeForm-container">
+        <div className="tradeForm-container" style={{ marginBottom: '20px' }}>
           <Form
             title={this.props.title}
             market={this.props.market}

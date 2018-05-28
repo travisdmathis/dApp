@@ -1,27 +1,19 @@
-// import store from '../store';
-
 export function selectContract({ contract }) {
   return function(dispatch) {
     dispatch({ type: 'SELECTED_CONTRACT', payload: contract });
   };
 }
 
-export function getContractBids(
-  { web3, getBids },
-  { MarketContract, OrderLib }
-) {
+export function getContractBids({ web3, getBids }) {
   const type = 'GET_BIDS';
 
   return async function(dispatch) {
     dispatch({ type: `${type}_PENDING` });
 
     if (web3 && typeof web3 !== 'undefined') {
-      // const orderLibInstance = await OrderLib.deployed();
-      // const marketContractInstance = await MarketContract.deployed();
-
-      const activeBids = await getBids();
-
-      dispatch({ type: `${type}_FULFILLED`, payload: activeBids });
+      await getBids().then(bids => {
+        dispatch({ type: `${type}_FULFILLED`, payload: bids });
+      });
     } else {
       dispatch({
         type: `${type}_REJECTED`,
@@ -31,22 +23,16 @@ export function getContractBids(
   };
 }
 
-export function getContractAsks(
-  { web3, getAsks },
-  { MarketContract, OrderLib }
-) {
+export function getContractAsks({ web3, getAsks }) {
   const type = 'GET_ASKS';
 
   return async function(dispatch) {
     dispatch({ type: `${type}_PENDING` });
 
     if (web3 && typeof web3 !== 'undefined') {
-      await OrderLib.deployed();
-      await MarketContract.deployed();
-
-      const activeAsks = await getAsks();
-
-      dispatch({ type: `${type}_FULFILLED`, payload: activeAsks });
+      await getAsks().then(asks => {
+        dispatch({ type: `${type}_FULFILLED`, payload: asks });
+      });
     } else {
       dispatch({
         type: `${type}_REJECTED`,
@@ -56,31 +42,44 @@ export function getContractAsks(
   };
 }
 
-export function tradeOrder({ web3, order }, { MarketContract }) {
+export function tradeOrder(
+  { web3, order, contractAddress },
+  { MarketContract }
+) {
   const type = 'TRADE_ORDER';
 
   return async function(dispatch) {
     dispatch({ type: `${type}_PENDING` });
 
     if (web3 && typeof web3 !== 'undefined') {
-      const marketContract = await MarketContract.deployed();
-
       console.log(order);
-      await marketContract.tradeOrder(
-        order.orderAddresses,
-        order.unsignedOrderValues,
-        order.orderQty, // qty is five
-        -1, // let us fill a one lot
-        order.v, // v
-        order.r, // r
-        order.s, // s
-        { from: web3.eth.accounts[0] }
-      );
 
-      // NOTE: this is a very rough example of how this could all work.  Essentially the user selects an order object
-      // to trade against and calls trade order from their account.
+      // Get current ethereum wallet.
+      web3.eth.getCoinbase(async function(error, coinbase) {
+        // Log errors, if any
+        // TODO: Handle error
+        if (error) {
+          console.error(error);
+        }
 
-      dispatch({ type: `${type}_FULFILLED` });
+        await MarketContract.at(contractAddress).then(async function(instance) {
+          await instance.tradeOrder(
+            order.orderAddresses,
+            order.unsignedOrderValues,
+            order.orderQty, // qty is five
+            -1, // let us fill a one lot
+            order.v, // v
+            order.r, // r
+            order.s, // s
+            { from: coinbase }
+          );
+
+          // NOTE: this is a very rough example of how this could all work.  Essentially the user selects an order object
+          // to trade against and calls trade order from their account.
+
+          dispatch({ type: `${type}_FULFILLED` });
+        });
+      });
     } else {
       dispatch({
         type: `${type}_REJECTED`,

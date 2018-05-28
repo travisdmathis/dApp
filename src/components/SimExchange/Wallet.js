@@ -9,8 +9,8 @@ const { Content } = Layout;
 class Wallet extends Component {
   render() {
     return (
-      <Layout style={{ background: '#FFF' }}>
-        <Content style={{ background: '#FFF' }}>
+      <Layout>
+        <Content>
           <HeaderMenu />
           <Table />
         </Content>
