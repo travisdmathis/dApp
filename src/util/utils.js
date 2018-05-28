@@ -10,12 +10,22 @@ const SELL_SIGN = -1;
  * @return {[*,*,*]}
  */
 export const signMessage = function(web3, address, message) {
-  const signature = web3.eth.sign(address, message);
-  const r = signature.slice(0, 66);
-  const s = `0x${signature.slice(66, 130)}`;
-  let v = web3.toDecimal(`0x${signature.slice(130, 132)}`);
-  if (v !== 27 && v !== 28) v += 27;
-  return [v, r, s];
+  return new Promise((resolve, reject) => {
+    web3.eth.sign(address, message, function(err, signature) {
+      // Log errors, if any
+      // TODO: Handle error
+      if (err) {
+        console.error(err);
+      }
+
+      const r = signature.slice(0, 66);
+      const s = `0x${signature.slice(66, 130)}`;
+      let v = web3.toDecimal(`0x${signature.slice(130, 132)}`);
+      if (v !== 27 && v !== 28) v += 27;
+
+      resolve([v, r, s]);
+    });
+  });
 };
 
 /**
@@ -53,53 +63,107 @@ export const calculateCollateral = function(
 };
 
 // TODO: move me to wherever I belong -clean up, add documentation, figure out how best to create order object in JS
-export async function getBids(web3, marketContract, orderLib) {
+export async function getBids(web3, contractAddress, marketContract, orderLib) {
+  console.log('getBids');
+
+  orderLib = await orderLib.deployed();
+
+  const { priceCap, priceFloor } = await marketContract
+    .at(contractAddress)
+    .then(async function(instance) {
+      const priceFloor = await instance.PRICE_FLOOR.call().then(data =>
+        data.toNumber()
+      );
+      const priceCap = await instance.PRICE_CAP.call().then(data =>
+        data.toNumber()
+      );
+
+      return { priceCap, priceFloor };
+    });
+
   // for now we will create orders around the contract mid price, eventually we should create orders
   // that are around an price pulled from an active API that mimics the oracle solution
-  const contractMidPrice =
-    (marketContract.PRICE_FLOOR.call().toNumber() +
-      marketContract.PRICE_CAP.call().toNumber()) /
-    2;
+  const contractMidPrice = (priceFloor + priceCap) / 2;
 
-  // we will need to fix this, the server will need to have an unlocked account created the order for the user to match
-  // here we are just using an account that we only have access to in the dev environment, but wont be able
-  // to use when we attempt to deploy to a test net (rinkeby)
-  return createNewOrders(
-    web3,
-    marketContract,
-    orderLib,
-    web3.eth.accounts[0],
-    contractMidPrice - BUY_SIGN, // subtract our sign so our market are not crossed.
-    SELL_SIGN,
-    5
-  );
+  return new Promise((resolve, reject) => {
+    // Get current ethereum wallet.
+    web3.eth.getCoinbase(async function(error, coinbase) {
+      // Log errors, if any
+      // TODO: Handle error
+      if (error) {
+        console.error(error);
+      }
+
+      // we will need to fix this, the server will need to have an unlocked account created the order for the user to match
+      // here we are just using an account that we only have access to in the dev environment, but wont be able
+      // to use when we attempt to deploy to a test net (rinkeby)
+      const bids = await createNewOrders(
+        web3,
+        contractAddress,
+        orderLib,
+        coinbase,
+        contractMidPrice - BUY_SIGN, // subtract our sign so our market are not crossed.
+        SELL_SIGN,
+        2
+      );
+
+      resolve(bids);
+    });
+  });
 }
 
-export async function getAsks(web3, marketContract, orderLib) {
+export async function getAsks(web3, contractAddress, marketContract, orderLib) {
+  console.log('getAsks');
+
+  orderLib = await orderLib.deployed();
+
+  const { priceCap, priceFloor } = await marketContract
+    .at(contractAddress)
+    .then(async function(instance) {
+      const priceFloor = await instance.PRICE_FLOOR.call().then(data =>
+        data.toNumber()
+      );
+      const priceCap = await instance.PRICE_CAP.call().then(data =>
+        data.toNumber()
+      );
+
+      return { priceCap, priceFloor };
+    });
+
   // for now we will create orders around the contract mid price, eventually we should create orders
   // that are around an price pulled from an active API that mimics the oracle solution
-  const contractMidPrice =
-    (marketContract.PRICE_FLOOR.call().toNumber() +
-      marketContract.PRICE_CAP.call().toNumber()) /
-    2;
+  const contractMidPrice = (priceFloor + priceCap) / 2;
 
-  // we will need to fix this, the server will need to have an unlocked account created the order for the user to match
-  // here we are just using an account that we only have access to in the dev environment, but wont be able
-  // to use when we attempt to deploy to a test net (rinkeby)
-  return createNewOrders(
-    web3,
-    marketContract,
-    orderLib,
-    web3.eth.accounts[0],
-    contractMidPrice - BUY_SIGN, // subtract our sign so our market are not crossed.
-    SELL_SIGN,
-    5
-  );
+  return new Promise((resolve, reject) => {
+    // Get current ethereum wallet.
+    web3.eth.getCoinbase(async function(error, coinbase) {
+      // Log errors, if any
+      // TODO: Handle error
+      if (error) {
+        console.error(error);
+      }
+
+      // we will need to fix this, the server will need to have an unlocked account created the order for the user to match
+      // here we are just using an account that we only have access to in the dev environment, but wont be able
+      // to use when we attempt to deploy to a test net (rinkeby)
+      const asks = await createNewOrders(
+        web3,
+        contractAddress,
+        orderLib,
+        coinbase,
+        contractMidPrice - BUY_SIGN, // subtract our sign so our market are not crossed.
+        SELL_SIGN,
+        2
+      );
+
+      resolve(asks);
+    });
+  });
 }
 
 const createNewOrders = async function(
   web3,
-  marketContract,
+  contractAddress,
   orderLib,
   makerAccount,
   startingPrice,
@@ -119,8 +183,9 @@ const createNewOrders = async function(
 
   for (let i = 0; i < desiredOrderCount; i++) {
     const newOrderPrice = startingPrice - i * mktSign;
+
     const order = new Order(
-      marketContract.address,
+      contractAddress,
       makerAccount,
       takerAccount,
       feeRecipient,
@@ -131,8 +196,10 @@ const createNewOrders = async function(
       1,
       orderQty
     );
+
     await order.getOrderHash(orderLib);
-    order.signOrder(web3, makerAccount);
+    await order.signOrder(web3, makerAccount);
+
     orders.push(order);
   }
 
@@ -284,14 +351,15 @@ class Order {
     return this.orderHash;
   }
 
-  signOrder(web3, makerAccount) {
+  async signOrder(web3, makerAccount) {
     if (this.isSigned) return;
 
-    const signature = signMessage(web3, makerAccount, this.orderHash);
-    this.v = signature[0];
-    this.r = signature[1];
-    this.s = signature[2];
-    this.isSigned = true;
+    await signMessage(web3, makerAccount, this.orderHash).then(signature => {
+      this.v = signature[0];
+      this.r = signature[1];
+      this.s = signature[2];
+      this.isSigned = true;
+    });
   }
 }
 

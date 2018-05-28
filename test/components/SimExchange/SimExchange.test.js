@@ -4,18 +4,50 @@ import { Link } from 'react-router-dom';
 import { mount } from 'enzyme';
 import { Menu } from 'antd';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 import SimExchange from '../../../src/components/SimExchange/SimExchange';
 import Trades from '../../../src/components/SimExchange/Trades';
 import Wallet from '../../../src/components/SimExchange/Wallet';
 
 describe('SimExchange', () => {
-  it('contains menu items', () => {
-    const pathname = '/exchange/trades/';
-    const component = mount(<MemoryRouter initialEntries={[ { pathname, key: 'start' } ]}>
-      <SimExchange shouldRender={true} />
-    </MemoryRouter>).find(SimExchange);
+  let simExchangeTrades;
+  let simExchangeWallet;
+  let getContractsSpy;
 
+  const tradesPath = '/exchange/trades/';
+  const walletPath = '/exchange/wallet/';
+
+  const props = {
+    asks: [],
+    bids: [],
+    tradeOrder: {}
+  };
+
+  beforeEach(() => {
+    getContractsSpy = sinon.spy();
+
+    simExchangeTrades = mount(
+      <MemoryRouter initialEntries={[{ pathname: tradesPath, key: 'start' }]}>
+        <SimExchange
+          asks={props.asks}
+          bids={props.bids}
+          getContracts={getContractsSpy}
+          shouldRender={true}
+          tradeOrder={props.tradeOrder}
+        />
+      </MemoryRouter>
+    );
+
+    simExchangeWallet = mount(
+      <MemoryRouter initialEntries={[{ pathname: walletPath, key: 'start' }]}>
+        <SimExchange getContracts={getContractsSpy} shouldRender={true} />
+      </MemoryRouter>
+    );
+  });
+
+  it('contains menu items', () => {
+    const component = simExchangeTrades.find(SimExchange);
     const menu = component.find(Menu);
 
     const hasTradesItem = menu.containsMatchingElement(
@@ -35,47 +67,34 @@ describe('SimExchange', () => {
   });
 
   it('renders trades', () => {
-    const props = {
-      asks: [],
-      bids: [],
-      tradeOrder: {}
-    };
-
-    const pathname = '/exchange/trades/';
-    const loader = mount(<MemoryRouter initialEntries={[ { pathname, key: 'start' } ]}>
-      <SimExchange {...props} shouldRender={true} />
-    </MemoryRouter>);
-
-    const component = loader.find(SimExchange);
-    const showsTrades = component.containsMatchingElement(<Trades
-      asks={props.asks}
-      bids={props.bids}
-      tradeOrder={props.tradeOrder}
-    />);
+    const component = simExchangeTrades.find(SimExchange);
+    const showsTrades = component.containsMatchingElement(
+      <Trades
+        asks={props.asks}
+        bids={props.bids}
+        tradeOrder={props.tradeOrder}
+      />
+    );
 
     expect(showsTrades, 'Should render trades').to.be.true;
   });
 
   it('renders wallet', () => {
-    const pathname = '/exchange/wallet/';
-    const loader = mount(<MemoryRouter initialEntries={[ { pathname, key: 'start' } ]}>
-      <SimExchange shouldRender={true} />
-    </MemoryRouter>);
-
-    const component = loader.find(SimExchange);
+    const component = simExchangeWallet.find(SimExchange);
     const showsWallet = component.containsMatchingElement(<Wallet />);
 
     expect(showsWallet, 'Should render wallet').to.be.true;
   });
 
   it('renders dummy text when disabled', () => {
-    const pathname = '/exchange/trades/';
-    const loader = mount(<MemoryRouter initialEntries={[ { pathname, key: 'start' } ]}>
-      <SimExchange />
-    </MemoryRouter>);
-
-    const component = loader.find(SimExchange);
-    const showsDummy = component.containsMatchingElement(<strong>Coming soon...</strong>);
+    const component = mount(
+      <MemoryRouter initialEntries={[{ tradesPath, key: 'start' }]}>
+        <SimExchange getContracts={getContractsSpy} shouldRender={false} />
+      </MemoryRouter>
+    ).find(SimExchange);
+    const showsDummy = component.containsMatchingElement(
+      <strong>Coming soon...</strong>
+    );
 
     expect(showsDummy, 'Should render dummy text').to.be.true;
   });

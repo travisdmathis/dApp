@@ -50,15 +50,15 @@ describe('signMessage', () => {
     const s =
       '0x69f945012f7ea7d3febf11eb1b78e1adc2d1c14c2cf48b25000938cc1860c83e';
 
-    const [actualV, actualR, actualS] = signMessage(
+    signMessage(
       web3,
       '0xf204a4ef082f5c04bb89f7d5e6568b796096735a',
       'This is my message :)'
-    );
-
-    expect(v, 'v not extracted correctly').to.equal(actualV);
-    expect(r, 'r not extracted correctly').to.equal(actualR);
-    expect(s, 's not extracted correctly').to.equal(actualS);
+    ).then(([actualV, actualR, actualS]) => {
+      expect(v, 'v not extracted correctly').to.equal(actualV);
+      expect(r, 'r not extracted correctly').to.equal(actualR);
+      expect(s, 's not extracted correctly').to.equal(actualS);
+    });
   });
 });
 

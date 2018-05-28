@@ -12,15 +12,15 @@ const { Content, Header, Sider } = Layout;
 class SimExchange extends Component {
   componentWillMount() {
     if (!this.props.contracts) {
-      // this.props.getContracts();
+      this.props.getContracts();
     }
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.contracts && !nextProps.contract) {
-      // this.props.selectContract(nextProps.contracts[0]);
-      // this.props.getAsks();
-      // this.props.getBids();
+      this.props.selectContract(nextProps.contracts[0]);
+      this.props.getAsks();
+      this.props.getBids();
     }
   }
 
@@ -40,15 +40,15 @@ class SimExchange extends Component {
 
     return (
       <Layout>
-        <Header style={{ paddingLeft: '224px', background: '#fff' }}>
+        <Header style={{ paddingLeft: '224px' }}>
           <TopBar
             contract={contract}
             contracts={contracts}
             onSelectContract={this.props.selectContract}
           />
         </Header>
-        <Layout style={{ background: '#fff' }}>
-          <Sider style={{ background: '#fff' }} width={200}>
+        <Layout>
+          <Sider width={200}>
             <Menu
               mode="inline"
               selectedKeys={[location.pathname]}
