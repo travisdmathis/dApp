@@ -1,3 +1,5 @@
+import { Market } from '@marketprotocol/marketjs';
+
 export function selectContract({ contract }) {
   return function(dispatch) {
     dispatch({ type: 'SELECTED_CONTRACT', payload: contract });
@@ -62,23 +64,16 @@ export function tradeOrder(
           console.error(error);
         }
 
-        await MarketContract.at(contractAddress).then(async function(instance) {
-          await instance.tradeOrder(
-            order.orderAddresses,
-            order.unsignedOrderValues,
-            order.orderQty, // qty is five
-            -1, // let us fill a one lot
-            order.v, // v
-            order.r, // r
-            order.s, // s
-            { from: coinbase }
-          );
+        order.taker = coinbase;
+        order.remainingQty = 1;
 
-          // NOTE: this is a very rough example of how this could all work.  Essentially the user selects an order object
-          // to trade against and calls trade order from their account.
-
-          dispatch({ type: `${type}_FULFILLED` });
+        const marketjs = new Market(web3.currentProvider);
+        await marketjs.tradeOrderAsync(order, 1, {
+          from: coinbase,
+          gas: 2000000
         });
+
+        dispatch({ type: `${type}_FULFILLED` });
       });
     } else {
       dispatch({

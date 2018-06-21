@@ -1,10 +1,7 @@
 import { expect } from 'chai';
-import Web3 from 'web3';
-import FakeProvider from 'web3-fake-provider';
 
 import {
   getMetamaskError,
-  signMessage,
   calculateCollateral,
   getCollateralTokenAddress
 } from '../../src/util/utils';
@@ -32,7 +29,7 @@ describe('getMetamaskError', () => {
   });
 });
 
-describe('signMessage', () => {
+/*describe('signMessage', () => {
   function getStubedWeb3(rawSignature) {
     const fakeProvider = new FakeProvider();
     const web3 = new Web3(fakeProvider);
@@ -60,7 +57,7 @@ describe('signMessage', () => {
       expect(s, 's not extracted correctly').to.equal(actualS);
     });
   });
-});
+});*/
 
 describe('calculateCollateral', () => {
   [
