@@ -213,24 +213,24 @@ const createNewOrders = async function(
   await collateralToken
     .at(collateralTokenAddress)
     .then(async function(collateralTokenInstance) {
-      collateralTokenInstance.transfer.call(maker, initialCredit.toNumber(), {
+      await collateralTokenInstance.transfer(maker, initialCredit.toNumber(), {
         from: web3.eth.accounts[0]
       });
 
-      collateralTokenInstance.approve.call(
+      const txResult = await collateralTokenInstance.approve(
         collateralPoolAddress,
         initialCredit.toNumber(),
         { from: maker }
       );
     });
 
-  /*await marketjs.getUserAccountBalanceAsync(
-    collateralTokenAddress,
-    web3.eth.accounts[0]
-  ).then(d => console.log(d));*/
+  // await marketjs.getUserAccountBalanceAsync(
+  //   collateralTokenAddress,
+  //   web3.eth.accounts[0]
+  // ).then(d => console.log(d));
 
   await marketjs
-    .depositCollateralAsync(collateralTokenAddress, initialCredit, {
+    .depositCollateralAsync(collateralPoolAddress, initialCredit, {
       from: maker
     })
     .then(d => console.log(d));
