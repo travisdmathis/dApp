@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { Market } from '@marketprotocol/marketjs';
 
 export function selectContract({ contract }) {
@@ -46,7 +47,7 @@ export function getContractAsks({ web3, getAsks }) {
 
 export function tradeOrder(
   { web3, order, contractAddress },
-  { MarketContract }
+  { CollateralToken, MarketContract }
 ) {
   const type = 'TRADE_ORDER';
 
@@ -57,20 +58,86 @@ export function tradeOrder(
       console.log(order);
 
       // Get current ethereum wallet.
-      web3.eth.getCoinbase(async function(error, coinbase) {
+      web3.eth.getAccounts(async function(error, accounts) {
         // Log errors, if any
         // TODO: Handle error
         if (error) {
           console.error(error);
         }
 
-        order.taker = coinbase;
-        order.remainingQty = 1;
+        order.remainingQty = 100;
 
         const marketjs = new Market(web3.currentProvider);
+
+        const initialCredit = new BigNumber(1e23);
+        const maker = accounts.length > 1 ? accounts[1] : accounts[0];
+
+        const {
+          collateralPoolAddress,
+          collateralTokenAddress
+        } = await MarketContract.at(contractAddress).then(async function(
+          instance
+        ) {
+          const collateralPoolAddress = await instance.MARKET_COLLATERAL_POOL_ADDRESS.call();
+          const collateralTokenAddress = await instance.COLLATERAL_TOKEN_ADDRESS.call();
+
+          return {
+            collateralPoolAddress,
+            collateralTokenAddress
+          };
+        });
+
+        await CollateralToken.at(collateralTokenAddress).then(async function(
+          collateralTokenInstance
+        ) {
+          await collateralTokenInstance.transfer(
+            maker,
+            initialCredit.toNumber(),
+            {
+              from: accounts[0]
+            }
+          );
+
+          await collateralTokenInstance.transfer(
+            accounts[0],
+            initialCredit.toNumber(),
+            {
+              from: accounts[0]
+            }
+          );
+
+          await collateralTokenInstance.approve(
+            collateralPoolAddress,
+            initialCredit.toNumber(),
+            { from: maker }
+          );
+
+          await collateralTokenInstance.approve(
+            collateralPoolAddress,
+            initialCredit.toNumber(),
+            { from: accounts[0] }
+          );
+        });
+
+        await marketjs.depositCollateralAsync(
+          collateralPoolAddress,
+          initialCredit,
+          {
+            from: maker
+          }
+        );
+
+        await marketjs.depositCollateralAsync(
+          collateralPoolAddress,
+          initialCredit,
+          {
+            from: accounts[0]
+          }
+        );
+
         await marketjs.tradeOrderAsync(order, 1, {
-          from: coinbase,
-          gas: 2000000
+          from: accounts[0],
+          gas: 400000
         });
 
         dispatch({ type: `${type}_FULFILLED` });

@@ -40,8 +40,7 @@ const mapDispatchToProps = dispatch => ({
       web3,
       contractAddress,
       contracts.MarketContract,
-      contracts.OrderLib,
-      contracts.CollateralToken
+      contracts.OrderLib
     );
 
     dispatch(getContractAsks({ web3, getAsks: getAsksUtil }));
@@ -61,8 +60,7 @@ const mapDispatchToProps = dispatch => ({
       web3,
       contractAddress,
       contracts.MarketContract,
-      contracts.OrderLib,
-      contracts.CollateralToken
+      contracts.OrderLib
     );
 
     dispatch(getContractBids({ web3, getBids: getBidsUtil }));
@@ -103,6 +101,7 @@ const mapDispatchToProps = dispatch => ({
       tradeOrder(
         { web3, order, contractAddress },
         {
+          CollateralToken: contracts.CollateralToken,
           MarketContract: contracts.MarketContract
         }
       )

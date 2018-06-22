@@ -1,5 +1,4 @@
 import { Market } from '@marketprotocol/marketjs';
-import BigNumber from 'bignumber.js';
 
 const BUY_SIGN = 1;
 const SELL_SIGN = -1;
@@ -39,41 +38,27 @@ export const calculateCollateral = function(
 };
 
 // TODO: move me to wherever I belong -clean up, add documentation, figure out how best to create order object in JS
-export async function getBids(
-  web3,
-  contractAddress,
-  marketContract,
-  orderLib,
-  collateralToken
-) {
+export async function getBids(web3, contractAddress, marketContract, orderLib) {
   console.log('getBids');
 
   orderLib = await orderLib.deployed();
 
-  const {
-    collateralPoolAddress,
-    collateralTokenAddress,
-    priceCap,
-    priceFloor
-  } = await marketContract.at(contractAddress).then(async function(instance) {
-    const priceFloor = await instance.PRICE_FLOOR.call().then(data =>
-      data.toNumber()
-    );
+  const { priceCap, priceFloor } = await marketContract
+    .at(contractAddress)
+    .then(async function(instance) {
+      const priceFloor = await instance.PRICE_FLOOR.call().then(data =>
+        data.toNumber()
+      );
 
-    const priceCap = await instance.PRICE_CAP.call().then(data =>
-      data.toNumber()
-    );
+      const priceCap = await instance.PRICE_CAP.call().then(data =>
+        data.toNumber()
+      );
 
-    const collateralPoolAddress = await instance.MARKET_COLLATERAL_POOL_ADDRESS.call();
-    const collateralTokenAddress = await instance.COLLATERAL_TOKEN_ADDRESS.call();
-
-    return {
-      collateralPoolAddress,
-      collateralTokenAddress,
-      priceCap,
-      priceFloor
-    };
-  });
+      return {
+        priceCap,
+        priceFloor
+      };
+    });
 
   // for now we will create orders around the contract mid price, eventually we should create orders
   // that are around an price pulled from an active API that mimics the oracle solution
@@ -98,10 +83,7 @@ export async function getBids(
         accounts.length > 1 ? accounts[1] : accounts[0],
         contractMidPrice - SELL_SIGN, // subtract our sign so our market are not crossed.
         SELL_SIGN,
-        2,
-        collateralToken,
-        collateralTokenAddress,
-        collateralPoolAddress
+        2
       );
 
       resolve(bids);
@@ -109,13 +91,7 @@ export async function getBids(
   });
 }
 
-export async function getAsks(
-  web3,
-  contractAddress,
-  marketContract,
-  orderLib,
-  collateralToken
-) {
+export async function getAsks(web3, contractAddress, marketContract, orderLib) {
   console.log('getAsks');
 
   orderLib = await orderLib.deployed();
@@ -131,12 +107,7 @@ export async function getAsks(
 
       const maker = accounts.length > 1 ? accounts[1] : accounts[0];
 
-      const {
-        collateralPoolAddress,
-        collateralTokenAddress,
-        priceCap,
-        priceFloor
-      } = await marketContract
+      const { priceCap, priceFloor } = await marketContract
         .at(contractAddress)
         .then(async function(instance) {
           const priceFloor = await instance.PRICE_FLOOR.call().then(data =>
@@ -146,12 +117,7 @@ export async function getAsks(
             data.toNumber()
           );
 
-          const collateralPoolAddress = await instance.MARKET_COLLATERAL_POOL_ADDRESS.call();
-          const collateralTokenAddress = await instance.COLLATERAL_TOKEN_ADDRESS.call();
-
           return {
-            collateralPoolAddress,
-            collateralTokenAddress,
             priceCap,
             priceFloor
           };
@@ -171,10 +137,7 @@ export async function getAsks(
         maker,
         contractMidPrice - BUY_SIGN, // subtract our sign so our market are not crossed.
         BUY_SIGN,
-        2,
-        collateralToken,
-        collateralTokenAddress,
-        collateralPoolAddress
+        2
       );
 
       resolve(asks);
@@ -189,17 +152,14 @@ const createNewOrders = async function(
   maker,
   startingPrice,
   mktSign,
-  desiredOrderCount,
-  collateralToken,
-  collateralTokenAddress,
-  collateralPoolAddress
+  desiredOrderCount
 ) {
   if (desiredOrderCount <= 0) return null;
 
   startingPrice = Math.trunc(startingPrice); //convert to integer
   const orders = [];
-  const orderQty = 1 * mktSign; // for now all orders have qty of 1 (+1 for bid, -1 for sell)
-  const expirationTimestamp = Math.floor(Date.now() / 1000) + 86400; // order expires in a day.
+  const orderQty = 100 * mktSign; // for now all orders have qty of 1 (+1 for bid, -1 for sell)
+  const expirationTimestamp = Math.floor(Date.now() / 1000) + 60 * 60; // order expires in a day.
   const taker = '0x0000000000000000000000000000000000000000';
   const feeRecipient = '0x0000000000000000000000000000000000000000';
   const makerFee = 0;
@@ -207,33 +167,6 @@ const createNewOrders = async function(
   const salt = 1;
 
   const marketjs = new Market(web3.currentProvider);
-
-  const initialCredit = new BigNumber(1e23);
-
-  await collateralToken
-    .at(collateralTokenAddress)
-    .then(async function(collateralTokenInstance) {
-      await collateralTokenInstance.transfer(maker, initialCredit.toNumber(), {
-        from: web3.eth.accounts[0]
-      });
-
-      return await collateralTokenInstance.approve(
-        collateralPoolAddress,
-        initialCredit.toNumber() * 2, // this is being called twice for some reason, so we have to double approve amount? @eswara? why is this called twice?
-        { from: maker }
-      );
-    });
-
-  // await marketjs.getUserAccountBalanceAsync(
-  //   collateralTokenAddress,
-  //   web3.eth.accounts[0]
-  // ).then(d => console.log(d));
-
-  await marketjs
-    .depositCollateralAsync(collateralPoolAddress, initialCredit, {
-      from: maker
-    })
-    .then(d => console.log(d));
 
   for (let i = 0; i < desiredOrderCount; i++) {
     const price = startingPrice - i * mktSign;
