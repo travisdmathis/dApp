@@ -217,9 +217,9 @@ const createNewOrders = async function(
         from: web3.eth.accounts[0]
       });
 
-      const txResult = await collateralTokenInstance.approve(
+      return await collateralTokenInstance.approve(
         collateralPoolAddress,
-        initialCredit.toNumber(),
+        initialCredit.toNumber() * 2, // this is being called twice for some reason, so we have to double approve amount? @eswara? why is this called twice?
         { from: maker }
       );
     });
