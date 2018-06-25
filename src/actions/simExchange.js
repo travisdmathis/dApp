@@ -135,7 +135,11 @@ export function tradeOrder(
           }
         );
 
-        await marketjs.tradeOrderAsync(order, 1, {
+        console.log(
+          'Order Qty =' + order.orderQty + ' fillQty must be the same sign!'
+        );
+        const fillQty = Math.sign(order.orderQty);
+        await marketjs.tradeOrderAsync(order, fillQty, {
           from: accounts[0],
           gas: 400000
         });
