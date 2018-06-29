@@ -5,8 +5,8 @@ import { Card, Row, Modal, Col } from 'antd';
 import Form from './Form';
 
 class HeaderMenu extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       amount: {},
@@ -37,12 +37,15 @@ class HeaderMenu extends Component {
 
   render() {
     const { amount } = this.state;
+    const { simExchange } = this.props;
+    const contract = simExchange.contract;
 
     return (
       <Row gutter={24} className="header-menu">
         <Col span={12}>
           <Card title="Deposit">
             <Form
+              collateralToken={contract && contract.COLLATERAL_TOKEN_SYMBOL}
               onSubmit={this.onSubmit}
               showModal={this.showModal}
               type="deposit"
@@ -53,6 +56,7 @@ class HeaderMenu extends Component {
         <Col span={12}>
           <Card title="Withdraw">
             <Form
+              collateralToken={contract && contract.COLLATERAL_TOKEN_SYMBOL}
               onSubmit={this.onSubmit}
               showModal={this.showModal}
               type="withdraw"
@@ -67,7 +71,8 @@ class HeaderMenu extends Component {
           onCancel={this.handleCancel}
         >
           <h3>
-            Are you sure you want to {amount.type} {amount.number} ETX?
+            Are you sure you want to {amount.type} {amount.number}{' '}
+            {contract && contract.COLLATERAL_TOKEN_SYMBOL}?
           </h3>
         </Modal>
       </Row>

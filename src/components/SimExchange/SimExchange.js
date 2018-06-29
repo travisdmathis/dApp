@@ -76,7 +76,11 @@ class SimExchange extends Component {
                 />
               )}
             />
-            <Route path="/exchange/wallet/" exact component={Wallet} />
+            <Route
+              exact
+              path="/exchange/wallet/"
+              render={() => <Wallet {...this.props} />}
+            />
             <Redirect to="/exchange/trades/" />
           </Switch>
         </Content>

@@ -15,8 +15,8 @@ class Wallet extends Component {
     return (
       <Layout>
         <Content>
-          <HeaderMenu />
-          <Table />
+          <HeaderMenu {...this.props} />
+          <Table {...this.props} />
         </Content>
       </Layout>
     );

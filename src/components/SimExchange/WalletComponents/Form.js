@@ -5,8 +5,8 @@ import { Form as AntForm, Input, Button } from 'antd';
 const FormItem = AntForm.Item;
 
 class Form extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.hasErrors = this.hasErrors.bind(this);
@@ -57,8 +57,9 @@ class Form extends Component {
             rules: [{ required: true, message: 'Please enter a number' }]
           })(
             <Input
-              addonAfter="ETH"
+              addonAfter={this.props.collateralToken}
               type="number"
+              min="0"
               placeholder="10.000"
               size="large"
             />

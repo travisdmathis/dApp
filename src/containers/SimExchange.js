@@ -20,6 +20,7 @@ import {
 
 const mapStateToProps = state => ({
   contracts: state.explorer.contracts,
+  simExchange: state.simExchange,
   shouldRender: true,
   ...state.simExchange
 });
