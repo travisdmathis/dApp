@@ -193,13 +193,32 @@ class MarketFooter extends Component {
               <h3 className="footer-link-category">Organization</h3>
               <p className="footer-link">
                 <Link
-                  to="https://marketprotocol.io/about"
+                  to="https://marketprotocol.io/team"
                   target="_blank"
                   style={{ color: 'inherit', textDecoration: 'none' }}
                 >
-                  About
+                  Team
                 </Link>
               </p>
+              <p className="footer-link">
+                <Link
+                  to="https://marketprotocol.io/partners"
+                  target="_blank"
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                >
+                  Partners
+                </Link>
+              </p>
+              <p className="footer-link">
+                <Link
+                  to="https://marketprotocol.io/jobs"
+                  target="_blank"
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                >
+                  Jobs (We're hiring!)
+                </Link>
+              </p>
+              <p>4450 Arapahoe Ave, Suite 100 Boulder, CO 80303</p>
               <p className="footer-link">
                 <Link
                   to="mailto:info@marketprotocol.io"
@@ -207,9 +226,6 @@ class MarketFooter extends Component {
                 >
                   info@marketprotocol.io
                 </Link>
-              </p>
-              <p className="footer-link">
-                4450 Arapahoe Ave, Suite 100 Boulder, CO 80303
               </p>
             </Col>
           </Row>

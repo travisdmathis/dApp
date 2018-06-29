@@ -16,7 +16,7 @@ if (process.env.NODE_ENV !== 'test') {
   MarketContractRegistry = require('../build/contracts/MarketContractRegistry');
   MarketContractFactory = require('../build/contracts/MarketContractFactoryOraclize');
   MarketContract = require('../build/contracts/MarketContractOraclize');
-  MarketCollateralPool = require('../build/contracts/MarketCollateralPool');
+  MarketCollateralPool = require('market-solidity/build/contracts/MarketCollateralPool');
   MarketCollateralPoolFactory = require('../build/contracts/MarketCollateralPoolFactory');
   MarketToken = require('../build/contracts/MarketToken');
   CollateralToken = require('../build/contracts/CollateralToken');

@@ -43,7 +43,10 @@ class HeaderMenu extends Component {
     return (
       <Row gutter={24} className="header-menu">
         <Col span={12}>
-          <Card title="Deposit">
+          <Card
+            title="Deposit Collateral"
+            extra={<span>Available: 10 WETH</span>}
+          >
             <Form
               collateralToken={contract && contract.COLLATERAL_TOKEN_SYMBOL}
               onSubmit={this.onSubmit}
@@ -54,7 +57,10 @@ class HeaderMenu extends Component {
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="Withdraw">
+          <Card
+            title="Withdraw Collateral"
+            extra={<span>Available: 0 WETH</span>}
+          >
             <Form
               collateralToken={contract && contract.COLLATERAL_TOKEN_SYMBOL}
               onSubmit={this.onSubmit}

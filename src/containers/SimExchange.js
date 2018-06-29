@@ -29,7 +29,6 @@ const mapDispatchToProps = dispatch => ({
   getAsks: () => {
     const web3 = store.getState().web3.web3Instance;
     const contractAddress = store.getState().simExchange.contract.key;
-
     const initializeContracts = CreateInitializer(
       contractConstructor.bind(null, web3)
     );
@@ -71,6 +70,7 @@ const mapDispatchToProps = dispatch => ({
     const initializeContracts = CreateInitializer(
       contractConstructor.bind(null, web3)
     );
+
     const contracts = initializeContracts(Contracts);
     const processContracts = processContractsList.bind(
       null,
@@ -79,6 +79,8 @@ const mapDispatchToProps = dispatch => ({
       contracts.CollateralToken,
       contracts.ERC20
     );
+
+    console.log('contracts getContracts', contracts);
 
     dispatch(
       loadContracts(
