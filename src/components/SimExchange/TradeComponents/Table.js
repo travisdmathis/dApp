@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 
 import { Table } from 'antd';
 
-import columns from '../columns';
+import columns from '../Columns';
 
-import './table.css';
+import './Table.less';
 
 class OrdersTable extends Component {
   constructor() {

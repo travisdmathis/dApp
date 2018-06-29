@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 
 import { Table, Row } from 'antd';
 
-import columns from './columns';
+import columns from './Columns';
 import wallet from '../data/wallet';
 
 class BuyTable extends Component {

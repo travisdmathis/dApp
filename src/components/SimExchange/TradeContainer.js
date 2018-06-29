@@ -1,11 +1,11 @@
 import React, { Component, Fragment } from 'react';
-import Form from './TradeComponents/form';
-import Table from './TradeComponents/table';
+import Form from './TradeComponents/Form';
+import Table from './TradeComponents/Table';
 import uniqueId from 'lodash/uniqueId';
 
 import { Modal, Table as AntTable } from 'antd';
 
-import columns from './columns';
+import columns from './Columns';
 
 class Buy extends Component {
   constructor(props) {

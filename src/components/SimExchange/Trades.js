@@ -3,7 +3,7 @@ import { Layout, Row, Col } from 'antd';
 
 import TradeContainer from './TradeContainer';
 
-import './Trades.css';
+import './Trades.less';
 
 const { Content } = Layout;
 

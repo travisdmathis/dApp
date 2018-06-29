@@ -23,7 +23,7 @@ class TopBar extends Component {
           <Col span={12}>
             {contracts && (
               <Dropdown overlay={menu}>
-                <Button style={{ marginLeft: 8 }}>
+                <Button>
                   {contract ? contract.CONTRACT_NAME : 'Contracts'}{' '}
                   <Icon type="down" />
                 </Button>

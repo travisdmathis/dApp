@@ -4,8 +4,6 @@ import { Card, Row, Modal, Col } from 'antd';
 
 import Form from './Form';
 
-import './header-menu.less';
-
 class HeaderMenu extends Component {
   constructor() {
     super();
@@ -43,7 +41,7 @@ class HeaderMenu extends Component {
     return (
       <Row gutter={24} className="header-menu">
         <Col span={12}>
-          <Card title="Deposit ETX">
+          <Card title="Deposit">
             <Form
               onSubmit={this.onSubmit}
               showModal={this.showModal}
@@ -53,7 +51,7 @@ class HeaderMenu extends Component {
           </Card>
         </Col>
         <Col span={12}>
-          <Card title="Withdraw ETX">
+          <Card title="Withdraw">
             <Form
               onSubmit={this.onSubmit}
               showModal={this.showModal}

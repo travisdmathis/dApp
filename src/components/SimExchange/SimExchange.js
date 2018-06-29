@@ -7,6 +7,8 @@ import TopBar from './TopBar';
 import Trades from './Trades';
 import Wallet from './Wallet';
 
+import './SimExchange.less';
+
 const { Content, Header, Sider } = Layout;
 
 class SimExchange extends Component {
@@ -19,8 +21,6 @@ class SimExchange extends Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.contracts && !nextProps.contract) {
       this.props.selectContract(nextProps.contracts[0]);
-      this.props.getAsks();
-      this.props.getBids();
     }
   }
 
@@ -40,56 +40,46 @@ class SimExchange extends Component {
 
     return (
       <Layout>
-        <Header style={{ paddingLeft: '224px' }}>
-          <TopBar
-            contract={contract}
-            contracts={contracts}
-            onSelectContract={this.props.selectContract}
-          />
-        </Header>
-        <Layout>
-          <Sider width={200}>
-            <Menu
-              mode="inline"
-              selectedKeys={[location.pathname]}
-              style={{ height: '95px' }}
-            >
-              <Menu.Item key="/exchange/trades/">
-                <Link to="/exchange/trades/">Trades</Link>
-              </Menu.Item>
-              <Menu.Item key="/exchange/wallet/">
-                <Link to="/exchange/wallet/">Wallet</Link>
-              </Menu.Item>
-            </Menu>
-          </Sider>
-          <Content
-            style={{ padding: '0 24px', minHeight: 250, marginBottom: '20px' }}
-          >
-            <Switch>
-              <Route
-                path="/:url*"
-                exact
-                strict
-                render={props => (
-                  <Redirect to={`${props.location.pathname}/`} />
-                )}
-              />
-              <Route
-                path="/exchange/trades/"
-                exact
-                render={() => (
-                  <Trades
-                    asks={asks}
-                    bids={bids}
-                    tradeOrder={this.props.tradeOrder}
-                  />
-                )}
-              />
-              <Route path="/exchange/wallet/" exact component={Wallet} />
-              <Redirect to="/exchange/trades/" />
-            </Switch>
-          </Content>
-        </Layout>
+        <Sider width={200}>
+          <Menu mode="inline" selectedKeys={[location.pathname]}>
+            <Menu.Item key="/exchange/trades/">
+              <Link to="/exchange/trades/">Trades</Link>
+            </Menu.Item>
+            <Menu.Item key="/exchange/wallet/">
+              <Link to="/exchange/wallet/">Wallet</Link>
+            </Menu.Item>
+          </Menu>
+        </Sider>
+        <Content className="exchange-content">
+          <Header className="exchange-header">
+            <TopBar
+              contract={contract}
+              contracts={contracts}
+              onSelectContract={this.props.selectContract}
+            />
+          </Header>
+          <Switch>
+            <Route
+              path="/:url*"
+              exact
+              strict
+              render={props => <Redirect to={`${props.location.pathname}/`} />}
+            />
+            <Route
+              path="/exchange/trades/"
+              exact
+              render={() => (
+                <Trades
+                  asks={asks}
+                  bids={bids}
+                  tradeOrder={this.props.tradeOrder}
+                />
+              )}
+            />
+            <Route path="/exchange/wallet/" exact component={Wallet} />
+            <Redirect to="/exchange/trades/" />
+          </Switch>
+        </Content>
       </Layout>
     );
   }

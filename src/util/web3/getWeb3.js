@@ -95,7 +95,7 @@ let getWeb3 = (
 
             console.log('Injected web3 detected.');
 
-            resolve(dispatch(web3Initialized(results)));
+            resolve(dispatch(web3Initialized(results, error)));
           }
         });
       } else {

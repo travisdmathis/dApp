@@ -7,6 +7,10 @@ import Table from './WalletComponents/Table';
 const { Content } = Layout;
 
 class Wallet extends Component {
+  componentDidMount() {
+    console.log(this.props.simExchange, 'simExchange');
+  }
+
   render() {
     return (
       <Layout>
