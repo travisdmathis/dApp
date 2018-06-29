@@ -5,8 +5,6 @@ import { Table, Row } from 'antd';
 import columns from './columns';
 import wallet from '../data/wallet';
 
-import './table.css';
-
 class BuyTable extends Component {
   constructor() {
     super();

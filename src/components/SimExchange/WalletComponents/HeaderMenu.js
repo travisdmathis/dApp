@@ -4,7 +4,7 @@ import { Card, Row, Modal, Col } from 'antd';
 
 import Form from './Form';
 
-import './header-menu.css';
+import './header-menu.less';
 
 class HeaderMenu extends Component {
   constructor() {
