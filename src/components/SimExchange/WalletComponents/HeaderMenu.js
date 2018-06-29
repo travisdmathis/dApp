@@ -34,8 +34,6 @@ class HeaderMenu extends Component {
           nextProps.web3.web3Instance.eth.accounts[0]
         )
         .then(res => {
-          console.log('res', res.toString());
-
           this.setState({
             unallocatedCollateral: res.toString()
           });
