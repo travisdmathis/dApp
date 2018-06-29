@@ -21,6 +21,7 @@ import {
 const mapStateToProps = state => ({
   contracts: state.explorer.contracts,
   simExchange: state.simExchange,
+  web3: state.web3,
   shouldRender: true,
   ...state.simExchange
 });
@@ -79,8 +80,6 @@ const mapDispatchToProps = dispatch => ({
       contracts.CollateralToken,
       contracts.ERC20
     );
-
-    console.log('contracts getContracts', contracts);
 
     dispatch(
       loadContracts(
