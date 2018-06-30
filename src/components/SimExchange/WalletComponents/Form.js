@@ -60,6 +60,7 @@ class Form extends Component {
               addonAfter={this.props.collateralToken}
               type="number"
               min="0"
+              step="0.001"
               placeholder="10.000"
               size="large"
             />

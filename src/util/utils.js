@@ -338,7 +338,10 @@ export const getCollateralTokenAddress = (network, quoteAsset) => {
     switch (quoteAsset) {
       case 'ETH':
         return '0x01b8de20c76ed06c7e93068a45951c26f70be3db';
+      case 'WETH':
+        return '0xc778417e063141139fce010982780140aa0cd5ab';
       case 'USDT':
+      case 'USD':
         return '0x0c58e89866dda96911a78dedf069a1848618c185';
       default:
         return '';

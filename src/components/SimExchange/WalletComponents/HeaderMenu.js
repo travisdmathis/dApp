@@ -1,47 +1,77 @@
 import React, { Component } from 'react';
 import { Market } from '@marketprotocol/marketjs';
+import abi from 'human-standard-token-abi';
 
 import { Card, Row, Modal, Col } from 'antd';
 
 import Form from './Form';
+import { getCollateralTokenAddress } from '../../../util/utils';
 
 class HeaderMenu extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      amount: {},
-      transaction: {},
-      unallocatedCollateral: 0
-    };
-
-    this.marketjs = new Market(this.props.web3.web3Instance.currentProvider);
+    if (props.web3.web3Instance) {
+      this.marketjs = new Market(props.web3.web3Instance.currentProvider);
+    }
 
     this.onSubmit = this.onSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.handleOk = this.handleOk.bind(this);
+
+    this.state = {
+      amount: {},
+      transaction: {},
+      unallocatedCollateral: 0,
+      availableCollateral: 0
+    };
   }
 
-  componentWillReceiveProps(nextProps) {
+  async componentWillReceiveProps(nextProps) {
     if (
       nextProps.simExchange.contract !== this.props.simExchange.contract &&
       nextProps.simExchange.contract !== null
     ) {
-      this.marketjs
+      await this.marketjs
         .getUserAccountBalanceAsync(
           nextProps.simExchange.contract.key,
           nextProps.web3.web3Instance.eth.accounts[0]
         )
         .then(res => {
           this.setState({
-            unallocatedCollateral: res.toString()
+            unallocatedCollateral:
+              nextProps.web3.web3Instance.toDecimal(res) / 1000000000000000000
           });
         });
+
+      let contractInstance = await nextProps.web3.web3Instance.eth
+        .contract(abi)
+        .at(
+          getCollateralTokenAddress(
+            nextProps.web3.network,
+            nextProps.simExchange.contract.COLLATERAL_TOKEN_SYMBOL
+          )
+        );
+
+      contractInstance.balanceOf.call(
+        nextProps.web3.web3Instance.eth.accounts[0],
+        (err, res) => {
+          if (err) {
+            console.error(err);
+          } else {
+            this.setState({
+              availableCollateral:
+                nextProps.web3.web3Instance.toDecimal(res) / 1000000000000000000
+            });
+          }
+        }
+      );
     }
   }
 
   onSubmit(amount) {
+    console.log('amount', amount);
     this.setState({ amount });
   }
 
@@ -55,6 +85,42 @@ class HeaderMenu extends Component {
 
   handleOk() {
     this.setState({ modal: false });
+    let marketjs = this.marketjs;
+    const { simExchange, web3 } = this.props;
+    const { amount } = this.state;
+
+    if (amount.type === 'deposit') {
+      console.log(
+        'deposit values',
+        simExchange.contract.key,
+        web3.web3Instance.toBigNumber(parseFloat(amount.number))
+      );
+      marketjs
+        .depositCollateralAsync(
+          simExchange.contract.key,
+          web3.web3Instance.toBigNumber(parseFloat(amount.number))
+        )
+        .then((err, res) => {
+          if (err) {
+            console.error('deposit', res);
+          } else {
+            console.log('deposit', res);
+          }
+        });
+    } else {
+      marketjs
+        .withdrawCollateralAsync(
+          simExchange.contract.key,
+          web3.web3Instance.toBigNumber(amount.number)
+        )
+        .then((err, res) => {
+          if (err) {
+            console.error('withdraw', res);
+          } else {
+            console.log('withdraw', res);
+          }
+        });
+    }
   }
 
   render() {
@@ -67,7 +133,15 @@ class HeaderMenu extends Component {
         <Col span={12}>
           <Card
             title="Deposit Collateral"
-            extra={contract && <span>Available: 10 WETH</span>}
+            extra={
+              contract && (
+                <span>
+                  Available:{' '}
+                  {`${this.state.availableCollateral}
+                  ${contract.COLLATERAL_TOKEN_SYMBOL}`}
+                </span>
+              )
+            }
           >
             <Form
               collateralToken={contract && contract.COLLATERAL_TOKEN_SYMBOL}
