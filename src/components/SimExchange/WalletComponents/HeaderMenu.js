@@ -5,7 +5,6 @@ import abi from 'human-standard-token-abi';
 import { Card, Row, Modal, Col } from 'antd';
 
 import Form from './Form';
-import { getCollateralTokenAddress } from '../../../util/utils';
 
 class HeaderMenu extends Component {
   constructor(props) {
@@ -19,6 +18,9 @@ class HeaderMenu extends Component {
     this.showModal = this.showModal.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.handleOk = this.handleOk.bind(this);
+    this.depositCollateral = this.depositCollateral.bind(this);
+    this.withdrawCollateral = this.withdrawCollateral.bind(this);
+    this.getBalances = this.getBalances.bind(this);
 
     this.state = {
       amount: {},
@@ -28,50 +30,16 @@ class HeaderMenu extends Component {
     };
   }
 
-  async componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (
       nextProps.simExchange.contract !== this.props.simExchange.contract &&
       nextProps.simExchange.contract !== null
     ) {
-      await this.marketjs
-        .getUserAccountBalanceAsync(
-          nextProps.simExchange.contract.key,
-          nextProps.web3.web3Instance.eth.accounts[0]
-        )
-        .then(res => {
-          this.setState({
-            unallocatedCollateral:
-              nextProps.web3.web3Instance.toDecimal(res) / 1000000000000000000
-          });
-        });
-
-      let contractInstance = await nextProps.web3.web3Instance.eth
-        .contract(abi)
-        .at(
-          getCollateralTokenAddress(
-            nextProps.web3.network,
-            nextProps.simExchange.contract.COLLATERAL_TOKEN_SYMBOL
-          )
-        );
-
-      contractInstance.balanceOf.call(
-        nextProps.web3.web3Instance.eth.accounts[0],
-        (err, res) => {
-          if (err) {
-            console.error(err);
-          } else {
-            this.setState({
-              availableCollateral:
-                nextProps.web3.web3Instance.toDecimal(res) / 1000000000000000000
-            });
-          }
-        }
-      );
+      this.getBalances(nextProps);
     }
   }
 
   onSubmit(amount) {
-    console.log('amount', amount);
     this.setState({ amount });
   }
 
@@ -85,42 +53,112 @@ class HeaderMenu extends Component {
 
   handleOk() {
     this.setState({ modal: false });
+    const { amount } = this.state;
+
+    if (amount.type === 'deposit') {
+      this.depositCollateral();
+    } else {
+      this.withdrawCollateral();
+    }
+  }
+
+  depositCollateral() {
     let marketjs = this.marketjs;
     const { simExchange, web3 } = this.props;
     const { amount } = this.state;
 
-    if (amount.type === 'deposit') {
-      console.log(
-        'deposit values',
-        simExchange.contract.key,
-        web3.web3Instance.toBigNumber(parseFloat(amount.number))
-      );
-      marketjs
-        .depositCollateralAsync(
-          simExchange.contract.key,
-          web3.web3Instance.toBigNumber(parseFloat(amount.number))
-        )
-        .then((err, res) => {
-          if (err) {
-            console.error('deposit', res);
-          } else {
-            console.log('deposit', res);
-          }
+    let txParams = {
+      from: web3.web3Instance.eth.coinbase
+    };
+
+    let collaterTokenContractInstance = web3.web3Instance.eth
+      .contract(abi)
+      .at(simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
+
+    collaterTokenContractInstance.approve(
+      simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
+      web3.web3Instance.toBigNumber(
+        parseFloat(amount.number * 1000000000000000000)
+      ),
+      txParams,
+      (err, res) => {
+        if (err) {
+          console.error(err);
+        } else {
+          marketjs
+            .depositCollateralAsync(
+              simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
+              web3.web3Instance.toBigNumber(
+                parseFloat(amount.number * 1000000000000000000)
+              ),
+              txParams
+            )
+            .then(res => {
+              if (res) {
+                this.getBalances(this.props);
+              }
+            });
+        }
+      }
+    );
+  }
+
+  getBalances(props) {
+    this.marketjs
+      .getUserAccountBalanceAsync(
+        props.simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
+        props.web3.web3Instance.eth.coinbase
+      )
+      .then(res => {
+        const unallocatedCollateral = props.web3.web3Instance
+          .fromWei(res.toFixed(), 'ether')
+          .toString();
+
+        this.setState({
+          unallocatedCollateral: unallocatedCollateral
         });
-    } else {
-      marketjs
-        .withdrawCollateralAsync(
-          simExchange.contract.key,
-          web3.web3Instance.toBigNumber(amount.number)
-        )
-        .then((err, res) => {
-          if (err) {
-            console.error('withdraw', res);
-          } else {
-            console.log('withdraw', res);
+      })
+      .then(() => {
+        let contractInstance = props.web3.web3Instance.eth
+          .contract(abi)
+          .at(props.simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
+
+        contractInstance.balanceOf.call(
+          props.web3.web3Instance.eth.coinbase,
+          (err, res) => {
+            if (err) {
+              console.error(err);
+            } else {
+              const availableCollateral = props.web3.web3Instance
+                .fromWei(res.toFixed(), 'ether')
+                .toString();
+
+              this.setState({
+                availableCollateral: availableCollateral
+              });
+            }
           }
-        });
-    }
+        );
+      });
+  }
+
+  withdrawCollateral() {
+    let marketjs = this.marketjs;
+    const { simExchange, web3 } = this.props;
+    const { amount } = this.state;
+    const txParams = {
+      from: web3.web3Instance.eth.coinbase
+    };
+
+    marketjs
+      .withdrawCollateralAsync(
+        simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
+        web3.web3Instance.toBigNumber(amount.number * 1000000000000000000),
+        txParams
+      )
+      .then(res => {
+        console.log('withdraw', res);
+      });
   }
 
   render() {

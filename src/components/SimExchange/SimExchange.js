@@ -20,7 +20,6 @@ class SimExchange extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.contracts && !nextProps.contract) {
-      console.log('selected contract', nextProps.contracts[0]);
       this.props.selectContract(nextProps.contracts[0]);
       // this.props.getAsks();
       // this.props.getBids();

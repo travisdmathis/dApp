@@ -256,6 +256,13 @@ export async function processContractsList(
         ] = await instance.PRICE_DECIMAL_PLACES.call().then(data =>
           data.toNumber()
         );
+
+        contractJSON[
+          'MARKET_COLLATERAL_POOL_ADDRESS'
+        ] = await instance.MARKET_COLLATERAL_POOL_ADDRESS.call().then(
+          data => data
+        );
+
         contractJSON[
           'QTY_MULTIPLIER'
         ] = await instance.QTY_MULTIPLIER.call().then(data => data.toNumber());
