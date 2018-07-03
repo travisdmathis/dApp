@@ -37,8 +37,6 @@ class BuyTable extends Component {
           web3.web3Instance.eth.getTransaction(
             transaction.transactionHash,
             (error, response) => {
-              console.log('txInfo', response);
-
               let payload = {
                 key: response.blockHash,
                 block: response.blockNumber,
@@ -61,11 +59,7 @@ class BuyTable extends Component {
                 }
               };
 
-              console.log('payload', payload);
-
               fetchedTransactions.push(payload);
-
-              console.log('fetchedTransactions', fetchedTransactions);
 
               this.setState({
                 transactions: _.uniq(fetchedTransactions)

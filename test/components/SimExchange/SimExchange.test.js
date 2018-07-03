@@ -21,6 +21,7 @@ describe('SimExchange', () => {
   const props = {
     asks: [],
     bids: [],
+    simExchange: [],
     tradeOrder: {}
   };
 
@@ -41,7 +42,11 @@ describe('SimExchange', () => {
 
     simExchangeWallet = mount(
       <MemoryRouter initialEntries={[{ pathname: walletPath, key: 'start' }]}>
-        <SimExchange getContracts={getContractsSpy} shouldRender={true} />
+        <SimExchange
+          getContracts={getContractsSpy}
+          simExchange={props.simExchange}
+          shouldRender={true}
+        />
       </MemoryRouter>
     );
   });
