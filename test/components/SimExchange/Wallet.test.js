@@ -3,28 +3,26 @@ import { shallow, mount } from 'enzyme';
 import { expect } from 'chai';
 import Web3 from 'web3';
 import FakeProvider from 'web3-fake-provider';
-import { Market } from '@marketprotocol/marketjs';
 
 import Wallet from '../../../src/components/SimExchange/Wallet';
 import Table from '../../../src/components/SimExchange/WalletComponents/Table';
-import { T, Modal } from 'antd';
-import columns from '../../../src/components/SimExchange/WalletComponents/Columns';
-import data from '../../../src/components/SimExchange/data/wallet';
 import HeaderMenu from '../../../src/components/SimExchange/WalletComponents/HeaderMenu';
 import Form from '../../../src/components/SimExchange/WalletComponents/Form';
 import sinon from 'sinon';
 
-import { Button, Popover } from 'antd';
-
 function mockedCoinbaseWeb3(
   callbackError = null,
-  coinbaseAddress = '0x123456'
+  coinbaseAddress = '0x123456',
+  transaction = {}
 ) {
   const fakeProvider = new FakeProvider();
   const web3 = new Web3(fakeProvider);
   fakeProvider.injectResult(['0x98765']);
   web3.eth.getCoinbase = callback => {
     callback(callbackError, coinbaseAddress);
+  };
+  web3.eth.getTransaction = callback => {
+    callback(callbackError, transaction);
   };
   return web3;
 }
@@ -173,7 +171,5 @@ describe('Table', () => {
         contract: mockContract
       }
     });
-
-    expect(table.containsMatchingElement(<T />)).to.equal(true);
   });
 });

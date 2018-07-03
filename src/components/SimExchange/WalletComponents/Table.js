@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import InputDataDecoder from 'ethereum-input-data-decoder';
-import abi from 'human-standard-token-abi';
+import { abi } from '../../../../build/contracts/MarketCollateralPool.json';
 
 import { Table, Row } from 'antd';
 
@@ -17,8 +17,6 @@ class BuyTable extends Component {
     };
 
     this.decoder = new InputDataDecoder(abi);
-
-    this.onChange = this.onChange.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -41,8 +39,7 @@ class BuyTable extends Component {
           web3.web3Instance.eth.getTransaction(
             transaction.transactionHash,
             (error, response) => {
-              const result = this.decoder.decodeData(response.input);
-              console.log('transaction', result);
+              const transactionInput = this.decoder.decodeData(response.input);
 
               if (
                 response.from === web3.web3Instance.eth.coinbase ||
@@ -52,18 +49,28 @@ class BuyTable extends Component {
                   key: response.blockHash,
                   block: response.blockNumber,
                   inout:
-                    response.from === web3.web3Instance.eth.coinbase
+                    transactionInput.name === 'depositTokensForTrading'
                       ? 'in'
                       : 'out',
                   type:
-                    response.from === web3.web3Instance.eth.coinbase
+                    transactionInput.name === 'depositTokensForTrading'
                       ? 'deposit'
                       : 'withdraw',
                   addresses: {
-                    from: response.from,
-                    to: response.to
+                    from:
+                      transactionInput.name === 'depositTokensForTrading'
+                        ? response.from
+                        : response.to,
+                    to:
+                      transactionInput.name === 'depositTokensForTrading'
+                        ? response.to
+                        : response.from
                   },
-                  amount: response.value.toString(),
+                  amount: `${web3.web3Instance
+                    .fromWei(transactionInput.inputs[0], 'ether')
+                    .toString()} ${
+                    simExchange.contract.COLLATERAL_TOKEN_SYMBOL
+                  }`,
                   details: {
                     hash: response.blockHash
                   }
@@ -80,12 +87,6 @@ class BuyTable extends Component {
         });
       });
     }
-  }
-
-  onChange(value) {
-    this.setState({
-      inputValue: value
-    });
   }
 
   render() {
