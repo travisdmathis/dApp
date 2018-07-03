@@ -1,4 +1,6 @@
 import React, { Component, Fragment } from 'react';
+import InputDataDecoder from 'ethereum-input-data-decoder';
+import abi from 'human-standard-token-abi';
 
 import { Table, Row } from 'antd';
 
@@ -13,6 +15,8 @@ class BuyTable extends Component {
       inputValue: 1,
       transactions: []
     };
+
+    this.decoder = new InputDataDecoder(abi);
 
     this.onChange = this.onChange.bind(this);
   }
@@ -37,33 +41,41 @@ class BuyTable extends Component {
           web3.web3Instance.eth.getTransaction(
             transaction.transactionHash,
             (error, response) => {
-              let payload = {
-                key: response.blockHash,
-                block: response.blockNumber,
-                inout:
-                  response.from === web3.web3Instance.eth.coinbase
-                    ? 'in'
-                    : 'out',
-                type:
-                  response.from === web3.web3Instance.eth.coinbase
-                    ? 'deposit'
-                    : 'withdraw',
-                addresses: {
-                  from: response.from,
-                  to: response.to
-                },
-                amount: response.value.toString(),
-                details: {
-                  hash: response.blockHash,
-                  id: response.transactionIndex
-                }
-              };
+              const result = this.decoder.decodeData(response.input);
+              console.log('transaction', result);
 
-              fetchedTransactions.push(payload);
+              if (
+                response.from === web3.web3Instance.eth.coinbase ||
+                response.to === web3.web3Instance.eth.coinbase
+              ) {
+                let payload = {
+                  key: response.blockHash,
+                  block: response.blockNumber,
+                  inout:
+                    response.from === web3.web3Instance.eth.coinbase
+                      ? 'in'
+                      : 'out',
+                  type:
+                    response.from === web3.web3Instance.eth.coinbase
+                      ? 'deposit'
+                      : 'withdraw',
+                  addresses: {
+                    from: response.from,
+                    to: response.to
+                  },
+                  amount: response.value.toString(),
+                  details: {
+                    hash: response.blockHash,
+                    id: response.transactionIndex
+                  }
+                };
 
-              this.setState({
-                transactions: _.uniq(fetchedTransactions)
-              });
+                fetchedTransactions.push(payload);
+
+                this.setState({
+                  transactions: _.uniq(fetchedTransactions)
+                });
+              }
             }
           );
         });

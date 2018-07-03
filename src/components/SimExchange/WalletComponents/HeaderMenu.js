@@ -198,6 +198,7 @@ class HeaderMenu extends Component {
               showModal={this.showModal}
               type="deposit"
               amount={amount}
+              className="deposit-form"
             />
           </Card>
         </Col>
@@ -220,6 +221,7 @@ class HeaderMenu extends Component {
               showModal={this.showModal}
               type="withdraw"
               amount={amount}
+              className="withdraw-form"
             />
           </Card>
         </Col>

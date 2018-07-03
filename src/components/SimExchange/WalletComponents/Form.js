@@ -72,6 +72,7 @@ class Form extends Component {
             htmlType="submit"
             type="primary"
             style={{ width: '100%' }}
+            className={type}
           >
             {type}
           </Button>
