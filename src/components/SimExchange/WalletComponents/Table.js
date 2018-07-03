@@ -65,8 +65,7 @@ class BuyTable extends Component {
                   },
                   amount: response.value.toString(),
                   details: {
-                    hash: response.blockHash,
-                    id: response.transactionIndex
+                    hash: response.blockHash
                   }
                 };
 

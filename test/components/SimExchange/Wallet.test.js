@@ -3,16 +3,18 @@ import { shallow, mount } from 'enzyme';
 import { expect } from 'chai';
 import Web3 from 'web3';
 import FakeProvider from 'web3-fake-provider';
+import { Market } from '@marketprotocol/marketjs';
 
 import Wallet from '../../../src/components/SimExchange/Wallet';
 import Table from '../../../src/components/SimExchange/WalletComponents/Table';
+import { T, Modal } from 'antd';
+import columns from '../../../src/components/SimExchange/WalletComponents/Columns';
+import data from '../../../src/components/SimExchange/data/wallet';
 import HeaderMenu from '../../../src/components/SimExchange/WalletComponents/HeaderMenu';
 import Form from '../../../src/components/SimExchange/WalletComponents/Form';
 import sinon from 'sinon';
 
 import { Button, Popover } from 'antd';
-
-import data from '../../../src/components/SimExchange/data/wallet';
 
 function mockedCoinbaseWeb3(
   callbackError = null,
@@ -63,16 +65,32 @@ describe('HeaderMenu', () => {
   it('renders form', () => {
     const web3 = mockedCoinbaseWeb3();
     const props = {
+      amount: {
+        type: 'deposit',
+        value: '1'
+      },
       simExchange: {
-        contract: mockContract
+        contract: ''
       },
       web3: {
         web3Instance: web3
       }
     };
-    const headerMenu = shallow(<HeaderMenu {...props} />);
+    const headerMenu = mount(<HeaderMenu {...props} />);
     const containsForm = headerMenu.containsMatchingElement(<Form />);
 
+    headerMenu.setProps({
+      amount: {
+        type: 'deposit',
+        value: '1'
+      },
+      simExchange: {
+        contract: mockContract
+      }
+    });
+
+    expect(headerMenu.props().amount.value).to.equal('1');
+    expect(headerMenu.props().amount.type).to.equal('deposit');
     expect(containsForm, 'Should render deposit/withdraw form').to.be.true;
   });
 
@@ -80,7 +98,7 @@ describe('HeaderMenu', () => {
     const web3 = mockedCoinbaseWeb3();
     const props = {
       simExchange: {
-        contract: mockContract
+        contract: ''
       },
       web3: {
         web3Instance: web3
@@ -90,17 +108,8 @@ describe('HeaderMenu', () => {
     };
     const headerMenu = mount(<HeaderMenu {...props} />);
 
-    headerMenu.setProps({
-      amount: {
-        type: 'deposit',
-        value: '1'
-      }
-    });
-
-    expect(headerMenu.props().amount.value).to.equal('1');
-    expect(headerMenu.props().amount.type).to.equal('deposit');
-
     const onSubmit = sinon.spy();
+
     const form = mount(
       <Form type="deposit" amount={props.amount} onSubmit={onSubmit} />
     );
@@ -122,31 +131,43 @@ describe('HeaderMenu', () => {
       web3: {
         web3Instance: web3
       },
-      amount: {},
+      amount: {
+        value: '1',
+        type: 'withdraw'
+      },
       modal: false
     };
     const headerMenu = mount(<HeaderMenu {...props} />);
-
-    headerMenu.setProps({
-      amount: {
-        type: 'withdraw',
-        value: '1'
-      }
-    });
 
     expect(headerMenu.props().amount.value).to.equal('1');
     expect(headerMenu.props().amount.type).to.equal('withdraw');
 
     const onSubmit = sinon.spy();
     const form = mount(
-      <Form type="deposit" amount={props.amount} onSubmit={onSubmit} />
+      <Form type="withdraw" amount={props.amount} onSubmit={onSubmit} />
     );
 
     expect(form).to.have.length(1);
     expect(headerMenu.props().modal).to.equal(false);
 
     form.props().onSubmit();
-
     expect(onSubmit.called).to.equal(true);
+  });
+});
+
+describe('Table', () => {
+  it('renders columns', () => {
+    const web3 = mockedCoinbaseWeb3();
+    const props = {
+      simExchange: {
+        contract: mockContract
+      },
+      web3: {
+        web3Instance: web3
+      }
+    };
+    const table = mount(<Table {...props} />);
+
+    expect(table.containsMatchingElement(<T />)).to.equal(true);
   });
 });
