@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Market } from '@marketprotocol/marketjs';
 import abi from 'human-standard-token-abi';
+import showMessage from '../../message';
 
 import { Card, Row, Modal, Col } from 'antd';
 
@@ -94,6 +95,12 @@ class HeaderMenu extends Component {
               txParams
             )
             .then(res => {
+              showMessage(
+                'success',
+                'Deposit successful, your transaction will process shortly.',
+                5
+              );
+
               if (res) {
                 this.getBalances(this.props);
               }
@@ -157,7 +164,11 @@ class HeaderMenu extends Component {
         txParams
       )
       .then(res => {
-        console.log('withdraw', res);
+        showMessage(
+          'success',
+          'Withdraw successful, your transaction will process shortly.',
+          5
+        );
       });
   }
 
