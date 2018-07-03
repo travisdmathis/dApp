@@ -83,6 +83,9 @@ describe('getCollateralTokenAddress', () => {
     expect(getCollateralTokenAddress('rinkeby', 'ETH')).to.equal(
       '0x01b8de20c76ed06c7e93068a45951c26f70be3db'
     );
+    expect(getCollateralTokenAddress('rinkeby', 'WETH')).to.equal(
+      '0xc778417e063141139fce010982780140aa0cd5ab'
+    );
     expect(getCollateralTokenAddress('rinkeby', 'USDT')).to.equal(
       '0x0c58e89866dda96911a78dedf069a1848618c185'
     );

@@ -343,9 +343,9 @@ export const isTestnetOrMainnet = network => {
 export const getCollateralTokenAddress = (network, quoteAsset) => {
   if (network === 'rinkeby') {
     switch (quoteAsset) {
-      case 'window.web3.eth':
+      case 'ETH':
         return '0x01b8de20c76ed06c7e93068a45951c26f70be3db';
-      case 'Wwindow.web3.eth':
+      case 'WETH':
         return '0xc778417e063141139fce010982780140aa0cd5ab';
       case 'USDT':
       case 'USD':
