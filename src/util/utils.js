@@ -65,8 +65,8 @@ export async function getBids(web3, contractAddress, marketContract, orderLib) {
   const contractMidPrice = (priceFloor + priceCap) / 2;
 
   return new Promise((resolve, reject) => {
-    // Get current ethereum wallet.
-    web3.eth.getAccounts(async function(error, accounts) {
+    // Get current window.web3.ethereum wallet.
+    web3.window.web3.eth.getAccounts(async function(error, accounts) {
       // Log errors, if any
       // TODO: Handle error
       if (error) {
@@ -97,8 +97,8 @@ export async function getAsks(web3, contractAddress, marketContract, orderLib) {
   orderLib = await orderLib.deployed();
 
   return new Promise((resolve, reject) => {
-    // Get current ethereum wallet.
-    web3.eth.getAccounts(async function(error, accounts) {
+    // Get current window.web3.ethereum wallet.
+    web3.window.web3.eth.getAccounts(async function(error, accounts) {
       // Log errors, if any
       // TODO: Handle error
       if (error) {
@@ -332,20 +332,20 @@ export const isTestnetOrMainnet = network => {
 /**
  * Set `collateralTokenAddress` based on the `network`
  *
- * `0x01b8de20c76ed06c7e93068a45951c26f70be3db` -- WETH
+ * `0x01b8de20c76ed06c7e93068a45951c26f70be3db` -- Wwindow.web3.eth
  * `0x0c58e89866dda96911a78dedf069a1848618c185` -- Stable USD
  *
  * @param network
  * @return collateralTokenAddress
  *
- * TODO: Update the method to return `WUSD` if the selected symbol pair is USD
+ * TODO: Update the mwindow.web3.ethod to return `WUSD` if the selected symbol pair is USD
  */
 export const getCollateralTokenAddress = (network, quoteAsset) => {
   if (network === 'rinkeby') {
     switch (quoteAsset) {
-      case 'ETH':
+      case 'window.web3.eth':
         return '0x01b8de20c76ed06c7e93068a45951c26f70be3db';
-      case 'WETH':
+      case 'Wwindow.web3.eth':
         return '0xc778417e063141139fce010982780140aa0cd5ab';
       case 'USDT':
       case 'USD':

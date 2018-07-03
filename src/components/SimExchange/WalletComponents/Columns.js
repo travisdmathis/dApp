@@ -35,16 +35,6 @@ export default [
     key: 'amount'
   },
   {
-    title: 'Price',
-    dataIndex: 'price',
-    key: 'price'
-  },
-  {
-    title: 'Total',
-    dataIndex: 'total',
-    key: 'total'
-  },
-  {
     title: '',
     key: 'details',
     render: (text, record) => (
@@ -57,12 +47,6 @@ export default [
               <div className="details-header">Hash:</div>
               <div title={text.details.hash} className="details-info">
                 {text.details.hash}
-              </div>
-            </div>
-            <div className="details">
-              <div className="details-header">Trade id:</div>
-              <div title={text.details.id} className="details-info">
-                {text.details.id}
               </div>
             </div>
           </div>
