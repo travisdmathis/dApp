@@ -160,13 +160,19 @@ describe('Table', () => {
     const web3 = mockedCoinbaseWeb3();
     const props = {
       simExchange: {
-        contract: mockContract
+        contract: ''
       },
       web3: {
         web3Instance: web3
       }
     };
     const table = mount(<Table {...props} />);
+
+    table.setProps({
+      simExchange: {
+        contract: mockContract
+      }
+    });
 
     expect(table.containsMatchingElement(<T />)).to.equal(true);
   });
