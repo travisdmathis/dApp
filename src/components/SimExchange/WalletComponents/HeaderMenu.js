@@ -10,8 +10,8 @@ class HeaderMenu extends Component {
   constructor(props) {
     super(props);
 
-    if (window.web3) {
-      this.marketjs = new Market(window.web3.currentProvider);
+    if (props.web3 && props.web3.web3Instance) {
+      this.marketjs = new Market(props.web3.web3Instance.currentProvider);
     }
 
     this.onSubmit = this.onSubmit.bind(this);
