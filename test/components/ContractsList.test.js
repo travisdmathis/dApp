@@ -55,5 +55,6 @@ describe('ContractsList', () => {
       contracts: [mockContract]
     });
     expect(contractsList.find(Table)).to.have.length(1);
+    expect(contractsList.props().contracts).to.have.length(1);
   });
 });
