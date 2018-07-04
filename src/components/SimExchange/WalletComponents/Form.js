@@ -63,6 +63,9 @@ class Form extends Component {
               step="0.001"
               placeholder="10.000"
               size="large"
+              className={
+                type === 'Deposit' ? 'deposit-input' : 'withdraw-input'
+              }
             />
           )}
         </FormItem>
@@ -72,7 +75,9 @@ class Form extends Component {
             htmlType="submit"
             type="primary"
             style={{ width: '100%' }}
-            className={type}
+            className={
+              type === 'Deposit' ? 'deposit-button' : 'withdraw-button'
+            }
           >
             {type}
           </Button>
@@ -86,7 +91,7 @@ const WrappedForm = AntForm.create({
   mapPropsToFields({ amount }) {
     return {
       number: AntForm.createFormField({
-        value: amount.value
+        value: amount && amount.value
       })
     };
   }

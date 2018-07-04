@@ -56,10 +56,15 @@ class HeaderMenu extends Component {
     this.setState({ modal: false });
     const { amount } = this.state;
 
-    if (amount.type === 'deposit') {
-      this.depositCollateral();
-    } else {
-      this.withdrawCollateral();
+    switch (amount.type) {
+      case 'deposit':
+        this.depositCollateral();
+        break;
+      case 'withdraw':
+        this.withdrawCollateral();
+        break;
+      default:
+        break;
     }
   }
 
@@ -230,9 +235,11 @@ class HeaderMenu extends Component {
           visible={this.state.modal}
           onOk={this.handleOk}
           onCancel={this.handleCancel}
+          className="collateral-modal"
         >
           <h3>
-            Are you sure you want to {amount.type} {amount.number}{' '}
+            Are you sure you want to {amount && amount.type}{' '}
+            {amount && amount.number}{' '}
             {contract && contract.COLLATERAL_TOKEN_SYMBOL}?
           </h3>
         </Modal>

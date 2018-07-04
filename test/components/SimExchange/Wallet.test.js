@@ -3,29 +3,17 @@ import { shallow, mount } from 'enzyme';
 import { expect } from 'chai';
 import Web3 from 'web3';
 import FakeProvider from 'web3-fake-provider';
+import { Input, Modal } from 'antd';
+import { Table as T } from 'antd';
+import { Market } from '@marketprotocol/marketjs';
+import BigNumber from 'bignumber.js';
 
 import Wallet from '../../../src/components/SimExchange/Wallet';
 import Table from '../../../src/components/SimExchange/WalletComponents/Table';
+import Columns from '../../../src/components/SimExchange/WalletComponents/Columns';
 import HeaderMenu from '../../../src/components/SimExchange/WalletComponents/HeaderMenu';
 import Form from '../../../src/components/SimExchange/WalletComponents/Form';
 import sinon from 'sinon';
-
-function mockedCoinbaseWeb3(
-  callbackError = null,
-  coinbaseAddress = '0x123456',
-  transaction = {}
-) {
-  const fakeProvider = new FakeProvider();
-  const web3 = new Web3(fakeProvider);
-  fakeProvider.injectResult(['0x98765']);
-  web3.eth.getCoinbase = callback => {
-    callback(callbackError, coinbaseAddress);
-  };
-  web3.eth.getTransaction = callback => {
-    callback(callbackError, transaction);
-  };
-  return web3;
-}
 
 const mockContract = {
   key: '0xaaa0099',
@@ -45,6 +33,20 @@ const mockContract = {
   collateralPoolBalance: ''
 };
 
+function mockedCoinbaseWeb3(
+  callbackError = null,
+  coinbaseAddress = '0x123456'
+) {
+  const fakeProvider = new FakeProvider();
+  const web3 = new Web3(fakeProvider);
+  fakeProvider.injectResult(['0x98765']);
+  web3.eth.getCoinbase = callback => {
+    callback(callbackError, coinbaseAddress);
+  };
+
+  return web3;
+}
+
 describe('Wallet', () => {
   it('renders wallet', () => {
     const component = shallow(<Wallet />);
@@ -60,9 +62,28 @@ describe('Wallet', () => {
 });
 
 describe('HeaderMenu', () => {
-  it('renders form', () => {
+  let headerMenu;
+  let form;
+  let onSubmit;
+  let showModal;
+  let validateFields;
+  let props;
+  let getFieldDecorator;
+  let getFieldError;
+  let isFieldTouched;
+  let getFieldsError;
+
+  beforeEach(() => {
     const web3 = mockedCoinbaseWeb3();
-    const props = {
+    onSubmit = sinon.spy();
+    showModal = sinon.spy();
+    validateFields = sinon.spy();
+    getFieldDecorator = sinon.spy();
+    getFieldError = sinon.spy();
+    isFieldTouched = sinon.spy();
+    getFieldsError = sinon.spy();
+
+    props = {
       amount: {
         type: 'deposit',
         value: '1'
@@ -72,104 +93,128 @@ describe('HeaderMenu', () => {
       },
       web3: {
         web3Instance: web3
-      }
+      },
+      form: {
+        validateFields: validateFields,
+        isFieldTouched: isFieldTouched,
+        getFieldDecorator: getFieldDecorator,
+        getFieldError: getFieldError,
+        getFieldsError: getFieldsError
+      },
+      showModal: showModal,
+      onSubmit: onSubmit,
+      type: 'deposit'
     };
-    const headerMenu = mount(<HeaderMenu {...props} />);
+
+    headerMenu = mount(<HeaderMenu {...props} />);
+  });
+
+  it('contains a form', () => {
     const containsForm = headerMenu.containsMatchingElement(<Form />);
 
+    expect(containsForm, 'Should render deposit/withdraw form').to.be.true;
+  });
+
+  it('should have a input field to accept deposits', () => {
+    form = headerMenu.find('.deposit-form');
+    expect(form.find(Input)).to.have.length(1);
+  });
+
+  it('should have a input field to accept withdraw', () => {
+    form = headerMenu.find('.withdraw-form').first();
+    expect(form.find(Input)).to.have.length(1);
+  });
+
+  it('should getBalances when a contract is selected', () => {
+    let spy = sinon.spy(headerMenu.instance(), 'getBalances');
+
+    headerMenu.update();
+
     headerMenu.setProps({
-      amount: {
-        type: 'deposit',
-        value: '1'
-      },
       simExchange: {
         contract: mockContract
       }
     });
 
-    expect(headerMenu.props().amount.value).to.equal('1');
-    expect(headerMenu.props().amount.type).to.equal('deposit');
-    expect(containsForm, 'Should render deposit/withdraw form').to.be.true;
+    expect(spy.called).to.equal(true);
   });
 
-  it('should show confirmation modal on deposit', () => {
-    const web3 = mockedCoinbaseWeb3();
-    const props = {
-      simExchange: {
-        contract: ''
-      },
-      web3: {
-        web3Instance: web3
-      },
-      amount: {},
-      modal: false
+  it('should update amount and submit request', () => {
+    const amount = {
+      type: 'deposit',
+      value: '1'
     };
-    const headerMenu = mount(<HeaderMenu {...props} />);
 
-    const onSubmit = sinon.spy();
+    let input = headerMenu.find('.deposit-input').first();
+    input.value = '1';
+    input.simulate('change');
 
-    const form = mount(
-      <Form type="deposit" amount={props.amount} onSubmit={onSubmit} />
-    );
+    let form = headerMenu.find('.deposit-form').first();
+    let spy = sinon.spy(headerMenu.instance(), 'onSubmit');
+    headerMenu.update();
 
-    expect(form).to.have.length(1);
-    expect(headerMenu.props().modal).to.equal(false);
-
-    form.props().onSubmit();
-
-    expect(onSubmit.called).to.equal(true);
+    form.simulate('submit');
+    headerMenu.instance().onSubmit(amount);
+    expect(spy.called).to.equal(true);
   });
 
-  it('should show confirmation modal on withdraw', () => {
-    const web3 = mockedCoinbaseWeb3();
-    const props = {
-      simExchange: {
-        contract: mockContract
-      },
-      web3: {
-        web3Instance: web3
-      },
-      amount: {
-        value: '1',
-        type: 'withdraw'
-      },
-      modal: false
-    };
-    const headerMenu = mount(<HeaderMenu {...props} />);
+  it('should open collateral modal', () => {
+    let spy = sinon.spy(headerMenu.instance(), 'showModal');
+    headerMenu.update();
 
-    expect(headerMenu.props().amount.value).to.equal('1');
-    expect(headerMenu.props().amount.type).to.equal('withdraw');
+    headerMenu.instance().showModal();
 
-    const onSubmit = sinon.spy();
-    const form = mount(
-      <Form type="withdraw" amount={props.amount} onSubmit={onSubmit} />
-    );
-
-    expect(form).to.have.length(1);
-    expect(headerMenu.props().modal).to.equal(false);
-
-    form.props().onSubmit();
-    expect(onSubmit.called).to.equal(true);
+    expect(headerMenu.state('modal')).to.equal(true);
+    expect(spy.called).to.equal(true);
   });
-});
 
-describe('Table', () => {
-  it('renders columns', () => {
-    const web3 = mockedCoinbaseWeb3();
-    const props = {
-      simExchange: {
-        contract: ''
-      },
-      web3: {
-        web3Instance: web3
-      }
-    };
-    const table = mount(<Table {...props} />);
+  it('should close collateral modal', () => {
+    let spy = sinon.spy(headerMenu.instance(), 'handleCancel');
+    headerMenu.update();
 
-    table.setProps({
-      simExchange: {
-        contract: mockContract
-      }
+    headerMenu.instance().handleCancel();
+
+    expect(headerMenu.state('modal')).to.equal(false);
+    expect(spy.called).to.equal(true);
+  });
+
+  it('should handleOk default', () => {
+    let spy = sinon.spy(headerMenu.instance(), 'handleOk');
+
+    headerMenu.update();
+    headerMenu.instance().onSubmit({ type: 'test', value: '1' });
+
+    headerMenu.instance().handleOk();
+
+    expect(headerMenu.state('modal')).to.equal(false);
+    expect(spy.called).to.equal(true);
+  });
+
+  describe('Table', () => {
+    it('renders with transaction data', () => {
+      const table = mount(<Table {...props} />);
+
+      const containsDataTable = table.containsMatchingElement(<T />);
+
+      table.setProps({
+        simExchange: {
+          contract: mockContract
+        }
+      });
+    });
+  });
+
+  describe('Table', () => {
+    it('renders with transaction data', () => {
+      const table = mount(<Table {...props} />);
+
+      const containsDataTable = table.containsMatchingElement(<T />);
+
+      table.setProps({
+        simExchange: {
+          contract: mockContract
+        }
+      });
     });
   });
 });
