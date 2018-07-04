@@ -20,7 +20,7 @@ const mockContract = {
   CONTRACT_NAME: 'ETHXBT',
   COLLATERAL_TOKEN: 'FakeDollars',
   COLLATERAL_TOKEN_SYMBOL: 'FUSD',
-  MARKET_COLLATERAL_POOL_ADDRESS: '0x8d8xsaw89wfx89892s66267s9',
+  MARKET_COLLATERAL_POOL_ADDRESS: new BigNumber('0x8d8xsaw89wfx89892s66267s9'),
   PRICE_FLOOR: '60465',
   PRICE_CAP: '20155',
   PRICE_DECIMAL_PLACES: '2',
@@ -42,6 +42,9 @@ function mockedCoinbaseWeb3(
   fakeProvider.injectResult(['0x98765']);
   web3.eth.getCoinbase = callback => {
     callback(callbackError, coinbaseAddress);
+  };
+  web3.fromWei = () => {
+    return new BigNumber(5);
   };
 
   return web3;
@@ -72,6 +75,7 @@ describe('HeaderMenu', () => {
   let getFieldError;
   let isFieldTouched;
   let getFieldsError;
+  let showMessage;
 
   beforeEach(() => {
     const web3 = mockedCoinbaseWeb3();
@@ -82,6 +86,7 @@ describe('HeaderMenu', () => {
     getFieldError = sinon.spy();
     isFieldTouched = sinon.spy();
     getFieldsError = sinon.spy();
+    showMessage = sinon.spy();
 
     props = {
       amount: {
@@ -103,7 +108,8 @@ describe('HeaderMenu', () => {
       },
       showModal: showModal,
       onSubmit: onSubmit,
-      type: 'deposit'
+      type: 'deposit',
+      showMessage: showMessage
     };
 
     headerMenu = mount(<HeaderMenu {...props} />);
@@ -190,18 +196,40 @@ describe('HeaderMenu', () => {
     expect(spy.called).to.equal(true);
   });
 
-  describe('Table', () => {
-    it('renders with transaction data', () => {
-      const table = mount(<Table {...props} />);
+  // it("should handleOk deposit", () => {
+  //   let spy = sinon.spy(headerMenu.instance(), "handleOk");
+  //   headerMenu.setProps({
+  //     simExchange: {
+  //       contract: mockContract
+  //     }
+  //   });
+  //
+  //   headerMenu.update();
+  //   headerMenu.instance().onSubmit({ type: "deposit", value: "1" });
+  //
+  //   headerMenu.instance().handleOk();
+  //
+  //   expect(headerMenu.state("modal")).to.equal(false);
+  //   expect(spy.called).to.equal(true);
+  // });
 
-      const containsDataTable = table.containsMatchingElement(<T />);
-
-      table.setProps({
-        simExchange: {
-          contract: mockContract
-        }
-      });
+  it('should handleOk withdraw', () => {
+    let spy = sinon.spy(headerMenu.instance(), 'handleOk');
+    headerMenu.setProps({
+      simExchange: {
+        contract: mockContract
+      }
     });
+
+    headerMenu.update();
+    headerMenu.instance().onSubmit({ type: 'withdraw', value: '1' });
+
+    headerMenu.instance().handleOk();
+
+    headerMenu.props().showMessage('success', 'test');
+
+    expect(headerMenu.state('modal')).to.equal(false);
+    expect(spy.called).to.equal(true);
   });
 
   describe('Table', () => {
