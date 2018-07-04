@@ -7,6 +7,7 @@ import { Input, Modal } from 'antd';
 import { Table as T } from 'antd';
 import { Market } from '@marketprotocol/marketjs';
 import BigNumber from 'bignumber.js';
+import abi from 'human-standard-token-abi';
 
 import Wallet from '../../../src/components/SimExchange/Wallet';
 import Table from '../../../src/components/SimExchange/WalletComponents/Table';
@@ -19,8 +20,9 @@ const mockContract = {
   key: '0xaaa0099',
   CONTRACT_NAME: 'ETHXBT',
   COLLATERAL_TOKEN: 'FakeDollars',
+  COLLATERAL_TOKEN_ADDRESS: '0x98d9df89dfdf8989gf9d98d98s6sd7',
   COLLATERAL_TOKEN_SYMBOL: 'FUSD',
-  MARKET_COLLATERAL_POOL_ADDRESS: new BigNumber('0x8d8xsaw89wfx89892s66267s9'),
+  MARKET_COLLATERAL_POOL_ADDRESS: new BigNumber(),
   PRICE_FLOOR: '60465',
   PRICE_CAP: '20155',
   PRICE_DECIMAL_PLACES: '2',
@@ -196,22 +198,24 @@ describe('HeaderMenu', () => {
     expect(spy.called).to.equal(true);
   });
 
-  // it("should handleOk deposit", () => {
-  //   let spy = sinon.spy(headerMenu.instance(), "handleOk");
-  //   headerMenu.setProps({
-  //     simExchange: {
-  //       contract: mockContract
-  //     }
-  //   });
-  //
-  //   headerMenu.update();
-  //   headerMenu.instance().onSubmit({ type: "deposit", value: "1" });
-  //
-  //   headerMenu.instance().handleOk();
-  //
-  //   expect(headerMenu.state("modal")).to.equal(false);
-  //   expect(spy.called).to.equal(true);
-  // });
+  it('should handleOk deposit', () => {
+    let spy = sinon.spy(headerMenu.instance(), 'handleOk');
+    headerMenu.setProps({
+      simExchange: {
+        contract: mockContract
+      }
+    });
+    const depositCollateral = sinon.spy();
+    headerMenu.instance().depositCollateral = depositCollateral;
+    headerMenu.update();
+
+    headerMenu.instance().onSubmit({ type: 'deposit', value: '1' });
+    headerMenu.instance().handleOk();
+
+    expect(headerMenu.state('modal')).to.equal(false);
+    expect(spy.called).to.equal(true);
+    expect(depositCollateral.called).to.equal(true);
+  });
 
   it('should handleOk withdraw', () => {
     let spy = sinon.spy(headerMenu.instance(), 'handleOk');

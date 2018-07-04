@@ -77,11 +77,11 @@ class HeaderMenu extends Component {
       from: web3.web3Instance.eth.coinbase
     };
 
-    let collaterTokenContractInstance = web3.web3Instance.eth
+    let collateralTokenContractInstance = web3.web3Instance.eth
       .contract(abi)
       .at(simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
 
-    collaterTokenContractInstance.approve(
+    collateralTokenContractInstance.approve(
       simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
       web3.web3Instance.toBigNumber(
         parseFloat(amount.number * 1000000000000000000)
@@ -89,7 +89,7 @@ class HeaderMenu extends Component {
       txParams,
       (err, res) => {
         if (err) {
-          console.error(err);
+          console.warn(err);
         } else {
           marketjs
             .depositCollateralAsync(
@@ -105,10 +105,6 @@ class HeaderMenu extends Component {
                 'Deposit successful, your transaction will process shortly.',
                 5
               );
-
-              if (res) {
-                this.getBalances(this.props);
-              }
             });
         }
       }
