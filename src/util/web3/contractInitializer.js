@@ -42,7 +42,12 @@ export default function CreateInitializer(contractConstructor) {
   return function(contracts) {
     const contractObjs = {};
     for (let contract in contracts) {
-      contractObjs[contract] = contractConstructor(contracts[contract]);
+      if (
+        contract.MARKET_COLLATERAL_POOL_ADDRESS !==
+        '0x0000000000000000000000000000000000000000'
+      ) {
+        contractObjs[contract] = contractConstructor(contracts[contract]);
+      }
     }
     return contractObjs;
   };

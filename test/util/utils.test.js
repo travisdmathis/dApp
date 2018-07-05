@@ -1,9 +1,14 @@
 import { expect } from 'chai';
+import BigNumber from 'bignumber.js';
+import Web3 from 'web3';
+import FakeProvider from 'web3-fake-provider';
 
 import {
   getMetamaskError,
   calculateCollateral,
-  getCollateralTokenAddress
+  getCollateralTokenAddress,
+  toBaseUnit,
+  fromBaseUnit
 } from '../../src/util/utils';
 
 describe('getMetamaskError', () => {
@@ -91,5 +96,31 @@ describe('getCollateralTokenAddress', () => {
     );
     expect(getCollateralTokenAddress('rinkeby', 'INVALIDQUOTE')).to.equal('');
     expect(getCollateralTokenAddress('invalidnetwork', 'ETH')).to.equal('');
+  });
+});
+
+describe('toBaseUnit', () => {
+  it('should return a big number', () => {
+    expect(toBaseUnit('5.5', 18)).to.equal(5500000000000000000);
+  });
+});
+
+describe('fromBaseUnit', () => {
+  function getStubedWeb3() {
+    const fakeProvider = new FakeProvider();
+    const web3 = new Web3(fakeProvider);
+
+    web3.toDecimal = (web3, value) => {
+      return parseFloat(value);
+    };
+
+    web3.toBigNumber = value => {
+      return new BigNumber(value);
+    };
+    return web3;
+  }
+
+  it('should return a small number', () => {
+    expect(fromBaseUnit('5500000000000000000', 18)).to.equal(5.5);
   });
 });

@@ -39,7 +39,7 @@ export const calculateCollateral = function(
 
 // TODO: move me to wherever I belong -clean up, add documentation, figure out how best to create order object in JS
 export async function getBids(web3, contractAddress, marketContract, orderLib) {
-  console.log('getBids');
+  ('getBids');
 
   orderLib = await orderLib.deployed();
 
@@ -327,6 +327,22 @@ export const isTestnetOrMainnet = network => {
   return (
     network !== 'truffle' && network !== 'ganache' && network !== 'unknown'
   );
+};
+
+/**
+ * Convert String to BigNumber
+ *
+ * @param network
+ * @return BigNumber
+ */
+export const toBaseUnit = (value, decimals) => {
+  console.log('toBaseUnit', value * 10 ** decimals);
+
+  return value * 10 ** decimals;
+};
+
+export const fromBaseUnit = (value, decimals) => {
+  return value / 10 ** decimals;
 };
 
 /**

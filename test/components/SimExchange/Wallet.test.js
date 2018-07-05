@@ -17,10 +17,10 @@ import Form from '../../../src/components/SimExchange/WalletComponents/Form';
 import sinon from 'sinon';
 
 const mockContract = {
-  key: '0xaaa0099',
+  key: '0x6467854f25ff1f1ff8c11a717faf03e409b53635',
   CONTRACT_NAME: 'ETHXBT',
   COLLATERAL_TOKEN: 'FakeDollars',
-  COLLATERAL_TOKEN_ADDRESS: '0x98d9df89dfdf8989gf9d98d98s6sd7',
+  COLLATERAL_TOKEN_ADDRESS: '0x6467854f25ff1f1ff8c11a717faf03e409b53635',
   COLLATERAL_TOKEN_SYMBOL: 'FUSD',
   MARKET_COLLATERAL_POOL_ADDRESS: new BigNumber(),
   PRICE_FLOOR: '60465',
@@ -37,7 +37,7 @@ const mockContract = {
 
 function mockedCoinbaseWeb3(
   callbackError = null,
-  coinbaseAddress = '0x123456'
+  coinbaseAddress = '0x6467854f25ff1f1ff8c11a717faf03e409b53635'
 ) {
   const fakeProvider = new FakeProvider();
   const web3 = new Web3(fakeProvider);

@@ -32,6 +32,10 @@ class BuyTable extends Component {
         address: simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS
       });
 
+      this.setState({
+        transactions: []
+      });
+
       filter.get((error, transactions) => {
         let fetchedTransactions = [];
 

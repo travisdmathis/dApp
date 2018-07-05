@@ -5,6 +5,8 @@ import showMessage from '../../message';
 
 import { Card, Row, Modal, Col } from 'antd';
 
+import { toBaseUnit } from '../../../util/utils';
+
 import Form from './Form';
 
 class HeaderMenu extends Component {
@@ -37,6 +39,16 @@ class HeaderMenu extends Component {
       nextProps.simExchange.contract !== null
     ) {
       this.getBalances(nextProps);
+
+      let collateralTokenContractInstance = nextProps.web3.web3Instance.eth
+        .contract(abi)
+        .at(nextProps.simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
+
+      collateralTokenContractInstance.decimals.call((err, res) => {
+        this.setState({
+          decimals: res.toNumber()
+        });
+      });
     }
   }
 
@@ -68,11 +80,10 @@ class HeaderMenu extends Component {
     }
   }
 
-  depositCollateral() {
-    let marketjs = this.marketjs;
+  async depositCollateral() {
+    const marketjs = this.marketjs;
     const { simExchange, web3 } = this.props;
     const { amount } = this.state;
-
     let txParams = {
       from: web3.web3Instance.eth.coinbase
     };
@@ -84,29 +95,25 @@ class HeaderMenu extends Component {
     collateralTokenContractInstance.approve(
       simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
       web3.web3Instance.toBigNumber(
-        parseFloat(amount.number * 1000000000000000000)
+        toBaseUnit(amount.number, this.state.decimals)
       ),
       txParams,
       (err, res) => {
-        if (err) {
-          console.warn(err);
-        } else {
-          marketjs
-            .depositCollateralAsync(
-              simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
-              web3.web3Instance.toBigNumber(
-                parseFloat(amount.number * 1000000000000000000)
-              ),
-              txParams
-            )
-            .then(res => {
-              showMessage(
-                'success',
-                'Deposit successful, your transaction will process shortly.',
-                5
-              );
-            });
-        }
+        marketjs
+          .depositCollateralAsync(
+            simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
+            web3.web3Instance.toBigNumber(
+              toBaseUnit(amount.number, this.state.decimals)
+            ),
+            txParams
+          )
+          .then(res => {
+            showMessage(
+              'success',
+              'Deposit successful, your transaction will process shortly.',
+              5
+            );
+          });
       }
     );
   }
@@ -161,7 +168,7 @@ class HeaderMenu extends Component {
     marketjs
       .withdrawCollateralAsync(
         simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
-        web3.web3Instance.toBigNumber(amount.number * 1000000000000000000),
+        toBaseUnit(amount.number, this.state.decimals),
         txParams
       )
       .then(res => {
