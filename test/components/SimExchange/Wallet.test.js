@@ -8,7 +8,6 @@ import { Table as T } from 'antd';
 import { Market } from '@marketprotocol/marketjs';
 import BigNumber from 'bignumber.js';
 import abi from 'human-standard-token-abi';
-
 import Wallet from '../../../src/components/SimExchange/Wallet';
 import Table from '../../../src/components/SimExchange/WalletComponents/Table';
 import Columns from '../../../src/components/SimExchange/WalletComponents/Columns';

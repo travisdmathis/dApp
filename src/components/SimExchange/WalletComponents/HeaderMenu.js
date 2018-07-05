@@ -39,17 +39,6 @@ class HeaderMenu extends Component {
       nextProps.simExchange.contract !== null
     ) {
       this.getBalances(nextProps);
-
-      let collateralTokenContractInstance = nextProps.web3.web3Instance.eth
-        .contract(abi)
-        .at(nextProps.simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
-
-      collateralTokenContractInstance.decimals.call((err, res) => {
-        this.setState({
-          decimals: res.toNumber(),
-          collateralTokenContractInstance: collateralTokenContractInstance
-        });
-      });
     }
   }
 
@@ -84,10 +73,20 @@ class HeaderMenu extends Component {
   async depositCollateral() {
     const marketjs = this.marketjs;
     const { simExchange, web3 } = this.props;
-    const { amount, collateralTokenContractInstance } = this.state;
+    const { amount } = this.state;
     let txParams = {
       from: web3.web3Instance.eth.coinbase
     };
+
+    let collateralTokenContractInstance = web3.web3Instance.eth
+      .contract(abi)
+      .at(simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
+
+    await collateralTokenContractInstance.decimals.call((err, res) => {
+      this.setState({
+        decimals: res.toNumber()
+      });
+    });
 
     collateralTokenContractInstance.approve(
       simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
@@ -162,19 +161,25 @@ class HeaderMenu extends Component {
       from: web3.web3Instance.eth.coinbase
     };
 
-    marketjs
-      .withdrawCollateralAsync(
-        simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
-        toBaseUnit(amount.number, this.state.decimals),
-        txParams
-      )
-      .then(res => {
-        showMessage(
-          'success',
-          'Withdraw successful, your transaction will process shortly.',
-          5
-        );
-      });
+    let collateralTokenContractInstance = web3.web3Instance.eth
+      .contract(abi)
+      .at(simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
+
+    collateralTokenContractInstance.decimals.call((err, decimals) => {
+      marketjs
+        .withdrawCollateralAsync(
+          simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
+          toBaseUnit(amount.number, decimals),
+          txParams
+        )
+        .then(res => {
+          showMessage(
+            'success',
+            'Withdraw successful, your transaction will process shortly.',
+            5
+          );
+        });
+    });
   }
 
   render() {
