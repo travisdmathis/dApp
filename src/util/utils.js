@@ -330,17 +330,23 @@ export const isTestnetOrMainnet = network => {
 };
 
 /**
- * Convert String to BigNumber
+ * Convert String to ERC20 Token Base Unit
  *
- * @param network
- * @return BigNumber
+ * @param value
+ * @param decimals
+ * @return BigNumber String
  */
 export const toBaseUnit = (value, decimals) => {
-  console.log('toBaseUnit', value * 10 ** decimals);
-
   return value * 10 ** decimals;
 };
 
+/**
+ * Convert BigNumber String to Number
+ *
+ * @param value
+ * @param decimals
+ * @return Number
+ */
 export const fromBaseUnit = (value, decimals) => {
   return value / 10 ** decimals;
 };

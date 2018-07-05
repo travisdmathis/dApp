@@ -46,7 +46,8 @@ class HeaderMenu extends Component {
 
       collateralTokenContractInstance.decimals.call((err, res) => {
         this.setState({
-          decimals: res.toNumber()
+          decimals: res.toNumber(),
+          collateralTokenContractInstance: collateralTokenContractInstance
         });
       });
     }
@@ -83,14 +84,10 @@ class HeaderMenu extends Component {
   async depositCollateral() {
     const marketjs = this.marketjs;
     const { simExchange, web3 } = this.props;
-    const { amount } = this.state;
+    const { amount, collateralTokenContractInstance } = this.state;
     let txParams = {
       from: web3.web3Instance.eth.coinbase
     };
-
-    let collateralTokenContractInstance = web3.web3Instance.eth
-      .contract(abi)
-      .at(simExchange.contract.COLLATERAL_TOKEN_ADDRESS);
 
     collateralTokenContractInstance.approve(
       simExchange.contract.MARKET_COLLATERAL_POOL_ADDRESS,
