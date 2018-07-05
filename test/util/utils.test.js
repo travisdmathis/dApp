@@ -1,7 +1,4 @@
 import { expect } from 'chai';
-import BigNumber from 'bignumber.js';
-import Web3 from 'web3';
-import FakeProvider from 'web3-fake-provider';
 
 import {
   getMetamaskError,
@@ -106,20 +103,6 @@ describe('toBaseUnit', () => {
 });
 
 describe('fromBaseUnit', () => {
-  function getStubedWeb3() {
-    const fakeProvider = new FakeProvider();
-    const web3 = new Web3(fakeProvider);
-
-    web3.toDecimal = (web3, value) => {
-      return parseFloat(value);
-    };
-
-    web3.toBigNumber = value => {
-      return new BigNumber(value);
-    };
-    return web3;
-  }
-
   it('should return a small number', () => {
     expect(fromBaseUnit('5500000000000000000', 18)).to.equal(5.5);
   });
