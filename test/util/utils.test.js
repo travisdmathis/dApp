@@ -4,6 +4,7 @@ import {
   getMetamaskError,
   calculateCollateral,
   getCollateralTokenAddress,
+  getLocationOrigin,
   toBaseUnit,
   fromBaseUnit
 } from '../../src/util/utils';
@@ -105,5 +106,11 @@ describe('toBaseUnit', () => {
 describe('fromBaseUnit', () => {
   it('should return a small number', () => {
     expect(fromBaseUnit('5500000000000000000', 18)).to.equal(5.5);
+  });
+});
+
+describe('getLocationOrigin', () => {
+  it('should return location origin', () => {
+    expect(getLocationOrigin()).to.equal(window.location.origin);
   });
 });

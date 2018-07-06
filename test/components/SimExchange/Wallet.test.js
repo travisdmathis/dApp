@@ -3,7 +3,7 @@ import { shallow, mount } from 'enzyme';
 import { expect } from 'chai';
 import Web3 from 'web3';
 import FakeProvider from 'web3-fake-provider';
-import { Input, Modal } from 'antd';
+import { Input, Modal, Menu } from 'antd';
 import { Table as T } from 'antd';
 import { Market } from '@marketprotocol/marketjs';
 import BigNumber from 'bignumber.js';

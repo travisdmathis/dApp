@@ -23,7 +23,8 @@ describe('SimExchange', () => {
     asks: [],
     bids: [],
     simExchange: [],
-    tradeOrder: {}
+    tradeOrder: {},
+    contract: {}
   };
 
   beforeEach(() => {
