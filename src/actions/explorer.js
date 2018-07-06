@@ -18,9 +18,9 @@ export function loadContracts(
       if (web3 && typeof web3 !== 'undefined') {
         // Declaring this for later so we can chain functions.
         let marketContractRegistryInstance;
+
         MarketContractRegistry.deployed().then(function(instance) {
           marketContractRegistryInstance = instance;
-
           // Attempt to find deployed contracts and get metadata
           marketContractRegistryInstance.getAddressWhiteList
             .call()

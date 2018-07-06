@@ -73,6 +73,7 @@ const mapDispatchToProps = dispatch => ({
     );
 
     const contracts = initializeContracts(Contracts);
+
     const processContracts = processContractsList.bind(
       null,
       contracts.MarketContract,
