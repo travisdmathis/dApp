@@ -11,14 +11,11 @@ class TopBar extends Component {
     const menu = (
       <Menu onClick={e => this.props.onSelectContract(e.item.props.contract)}>
         {validContracts &&
-          validContracts.map(
-            c =>
-              c.key && (
-                <Menu.Item key={c.key} contract={c}>
-                  {c.CONTRACT_NAME}
-                </Menu.Item>
-              )
-          )}
+          validContracts.map(c => (
+            <Menu.Item key={c.key} contract={c}>
+              {c.CONTRACT_NAME}
+            </Menu.Item>
+          ))}
       </Menu>
     );
 
